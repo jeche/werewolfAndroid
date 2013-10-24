@@ -1,0 +1,5 @@
+package edu.wm.werewolf.constants;
+
+public class Constants {
+	private String url;
+}

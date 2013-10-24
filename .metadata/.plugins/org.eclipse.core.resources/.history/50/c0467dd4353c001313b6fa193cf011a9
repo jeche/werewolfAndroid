@@ -1,0 +1,74 @@
+package edu.wm.werewolf;
+
+import java.util.List;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import edu.wm.werewolf.constants.Constants;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+import android.widget.Button;
+import android.widget.EditText;
+
+public class MainActivity extends Activity {
+
+	private EditText usernameText;
+	private EditText passwordText;
+	private EditText verifyPasswordText;
+	private EditText firstNameText;
+	private EditText lastNameText;
+	private Button registerButton;
+	private Constants c;
+	private String username;//do this for all
+	
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		
+		usernameText = (EditText) findViewById(R.id.username);
+		passwordText = (EditText) findViewById(R.id.password);
+		verifyPasswordText = (EditText) findViewById(R.id.verifyPassword);
+		firstNameText = (EditText) findViewById(R.id.firstName);
+		lastNameText = (EditText) findViewById(R.id.lastName);
+		registerButton = (Button) findViewById(R.id.createButton);
+		
+		if (savedInstanceState == null)
+		{
+			username = "";
+		}
+		else
+		{
+			username = savedInstanceState.getString("username");
+		}
+		
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(c.getBaseUrl());
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("key1", "value1"));
+		pairs.add(new BasicNameValuePair("key2", "value2"));
+		post.setEntity(new UrlEncodedFormEntity(pairs));
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+	
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+		outState.putString("username", username);
+	}
+
+}
