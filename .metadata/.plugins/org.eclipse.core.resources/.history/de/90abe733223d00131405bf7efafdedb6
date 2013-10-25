@@ -146,7 +146,6 @@ public class MainActivity extends Activity {
 
 	    @Override
 	    protected void onPostExecute(String result) {
-	      Log.v(null, response);
 	      if(response.equals(c.success())){
 				Log.v(null, "going to pref");
 				Context context3 = getApplicationContext();
