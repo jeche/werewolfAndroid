@@ -1,0 +1,21 @@
+package edu.wm.werewolf;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+
+public class PlayerList extends Activity {
+
+	public void onCreate(Bundle savedInstanceState) {
+		try {
+			JSONObject jsonObj = new JSONObject(getIntent().getStringExtra("playerList"));
+			Log.v(null, jsonObj.toString()));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

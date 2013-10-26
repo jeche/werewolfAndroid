@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="11" />
+        android:minSdkVersion="10"
+        android:targetSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -24,7 +24,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:enabled="true" android:exported="true" android:name=".GameUpdateService" />
         <activity android:name="edu.wm.werewolf.GameStatus" android:label="@+string/activity_gamestatus"></activity>
+        <activity android:name="edu.wm.werewolf.PlayerList" android:label="@+string/activity_playerlist"></activity>
     </application>
 
 </manifest>

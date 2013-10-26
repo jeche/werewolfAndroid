@@ -1,0 +1,5 @@
+package edu.wm.werewolf.service;
+
+public class GameUpdateService extends Service{
+
+}

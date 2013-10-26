@@ -11,5 +11,10 @@
     <string name="firstName">First Name</string>
     <string name="lastName">Last Name</string>
     <string name="register">Register</string>
+    <string name="timerVal">00:00:00</string>
+    <string name="pauseButtonLabel">Pause</string>
+    <string name="startButtonLabel">Start</string>
+    <string name="playerlist">Player List</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

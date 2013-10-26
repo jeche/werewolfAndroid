@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -19,12 +20,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.wm.werewolf.constants.Constants;
+import edu.wm.werewolf.service.GameUpdateService;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -44,13 +50,25 @@ public class MainActivity extends Activity {
 	private Button registerButton;
 	private Constants c = new Constants();
 	private String username;//do this for all
-	private String response;
+	private JSONObject response;
 	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.SECOND, 10);
+      
+		Intent intent = new Intent(this, GameUpdateService.class);
+
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
+      
+		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+       //for 30 mint 60*60*1000
+		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                    3*1000, pintent);
+		startService(new Intent(getBaseContext(), GameUpdateService.class));
 		
 		usernameText = (EditText) findViewById(R.id.username);
 		passwordText = (EditText) findViewById(R.id.password);
@@ -85,38 +103,10 @@ public class MainActivity extends Activity {
 		outState.putString("username", username);
 	}
 	
-//	public void myClickHandler(View view) {
-//		HttpClient client = new DefaultHttpClient();
-//		HttpPost post = new HttpPost(c.getBaseUrl()+"addUser");
-//		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-//		pairs.add(new BasicNameValuePair("userName", usernameText.getText().toString()));
-//		pairs.add(new BasicNameValuePair("id", usernameText.getText().toString()));
-//		pairs.add(new BasicNameValuePair("firstName", firstNameText.getText().toString()));
-//		pairs.add(new BasicNameValuePair("lastName", lastNameText.getText().toString()));
-//		pairs.add(new BasicNameValuePair("hashedPassword", passwordText.getText().toString()));
-//
-//		try {
-//			post.setEntity(new UrlEncodedFormEntity(pairs));
-//			HttpResponse response = client.execute(post);
-//			String jsonString = EntityUtils.toString(response.getEntity());
-//			System.out.println(jsonString);
-//			if (jsonString.equals(c.success())){
-//				;
-//			}
-//		} catch (UnsupportedEncodingException e) {
-//			e.printStackTrace();
-//		} catch (ClientProtocolException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//	}
-	
 	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
 	    @Override
 	    protected String doInBackground(String... urls) {
-	      response = "";
+	      String resp = "";
 	      for (String url : urls) {
 	        DefaultHttpClient client = new DefaultHttpClient();
 	        HttpPost httpPost= new HttpPost(url);
@@ -134,36 +124,48 @@ public class MainActivity extends Activity {
 	          BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
 	          String s = "";
 	          while ((s = buffer.readLine()) != null) {
-	            response += s;
+	            resp += s;
 	          }
 
 	        } catch (Exception e) {
 	          e.printStackTrace();
 	        }
 	      }
-	      return response;
+	      try {
+			response = new JSONObject(resp);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      return resp;
 	    }
 
 	    @Override
 	    protected void onPostExecute(String result) {
-	      Log.v(null, response);
-	      if(response.equals(c.success())){
-				Log.v(null, "going to pref");
-				Context context3 = getApplicationContext();
-				CharSequence text3 = "Successful Registration!";
-				int duration3 = Toast.LENGTH_SHORT;
-				Toast toast3 = Toast.makeText(context3, text3, duration3);
-				toast3.show();
-				Intent intent2 = new Intent(context3, GameStatus.class);
-				intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent2);
-	      }else{
-	    	  	Context context3 = getApplicationContext();
-				CharSequence text3 = "There was an error creating your account.";
-				int duration3 = Toast.LENGTH_SHORT;
-				Toast toast3 = Toast.makeText(context3, text3, duration3);
-				toast3.show();
-	      }
+//	      Log.v(null, response);
+	      
+	      try {
+			if(response.getString("status").equals(c.success())){
+					Log.v(null, "going to pref");
+					Context context3 = getApplicationContext();
+					CharSequence text3 = "Successful Registration!";
+					int duration3 = Toast.LENGTH_SHORT;
+					Toast toast3 = Toast.makeText(context3, text3, duration3);
+					toast3.show();
+					Intent intent2 = new Intent(context3, GameStatus.class);
+					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent2);
+			  }else{
+				  	Context context3 = getApplicationContext();
+					CharSequence text3 = "There was an error creating your account.";
+					int duration3 = Toast.LENGTH_SHORT;
+					Toast toast3 = Toast.makeText(context3, text3, duration3);
+					toast3.show();
+			  }
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    }
 	  }
 

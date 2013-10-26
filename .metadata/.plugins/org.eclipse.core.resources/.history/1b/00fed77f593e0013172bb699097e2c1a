@@ -1,0 +1,7 @@
+package edu.wm.werewolf.service;
+
+import android.app.Service;
+
+public class GameUpdateService extends Service{
+
+}

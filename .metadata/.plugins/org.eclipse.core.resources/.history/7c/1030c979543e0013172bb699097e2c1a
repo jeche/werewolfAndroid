@@ -1,0 +1,9 @@
+package edu.wm.werewolf;
+
+import android.app.Activity;
+
+public class PlayerList extends Activity {
+
+	
+	 JSONObject jsonObj = new JSONObject(getIntent().getStringExtra("product"));
+}
