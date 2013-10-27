@@ -12,11 +12,19 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 
+import edu.wm.werewolf.GameStatus;
+
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 public class WebPageTask extends AsyncTask<String, Void, String>{
 	
@@ -39,22 +47,35 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 	@Override
 	protected String doInBackground(String... urls) {
 	      String resp = "";
+	      HttpResponse execute;
 	      for (String url : urls) {
 	        DefaultHttpClient client = new DefaultHttpClient();
 	        URI uri = null;
+	        
 			try {
 				uri = new URI(url);
 			} catch (URISyntaxException e1) {
 				e1.printStackTrace();
 			}
-	        HttpGet httpPost= new HttpGet(url);
-//			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			client.getCredentialsProvider().setCredentials(
 					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
-					new UsernamePasswordCredentials("admin", "admin"));
+					new UsernamePasswordCredentials("admin", "admin")); // CHANGE TO USERNAME/PASSWORD
+
+			
 	        try {
-//	          httpPost.setEntity(new UrlEncodedFormEntity(pairs));
-	          HttpResponse execute = client.execute(httpPost);
+	        	if(isPost){
+					HttpPost httpPost = new HttpPost(url);
+			          if(hasPairs){
+				          	httpPost.setEntity(new UrlEncodedFormEntity(pairs));
+				          }
+			          execute = client.execute(httpPost);
+				}
+	        	else{
+					HttpGet httpPost= new HttpGet(url);
+					execute = client.execute(httpPost);
+				}
+
+	          
 	          InputStream content = execute.getEntity().getContent();
 
 	          BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
@@ -71,5 +92,33 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 	      
 	      return resp;
 	}
+	
+    @Override
+    protected void onPostExecute(String result) {
+//      Log.v(null, response);
+//      
+//      try {
+//		if(response.getString("status").equals(c.success())){
+//				Log.v(null, "going to pref");
+//				Context context3 = getApplicationContext();
+//				CharSequence text3 = "Successful Registration!";
+//				int duration3 = Toast.LENGTH_SHORT;
+//				Toast toast3 = Toast.makeText(context3, text3, duration3);
+//				toast3.show();
+//				Intent intent2 = new Intent(context3, GameStatus.class);
+//				intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//				startActivity(intent2);
+//		  }else{
+//			  	Context context3 = getApplicationContext();
+//				CharSequence text3 = "There was an error creating your account.";
+//				int duration3 = Toast.LENGTH_SHORT;
+//				Toast toast3 = Toast.makeText(context3, text3, duration3);
+//				toast3.show();
+//		  }
+//	} catch (JSONException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+    }
 
 }

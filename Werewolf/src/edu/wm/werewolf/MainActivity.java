@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
+import edu.wm.werewolf.web.WebPageTask;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -102,47 +103,15 @@ public class MainActivity extends Activity {
 		outState.putString("username", username);
 	}
 	
-	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
-	    @Override
-	    protected String doInBackground(String... urls) {
-	      String resp = "";
-	      for (String url : urls) {
-	        DefaultHttpClient client = new DefaultHttpClient();
-	        HttpPost httpPost= new HttpPost(url);
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			pairs.add(new BasicNameValuePair("userName", usernameText.getText().toString()));
-			pairs.add(new BasicNameValuePair("id", usernameText.getText().toString()));
-			pairs.add(new BasicNameValuePair("firstName", firstNameText.getText().toString()));
-			pairs.add(new BasicNameValuePair("lastName", lastNameText.getText().toString()));
-			pairs.add(new BasicNameValuePair("hashedPassword", passwordText.getText().toString()));
-	        try {
-	          httpPost.setEntity(new UrlEncodedFormEntity(pairs));
-	          HttpResponse execute = client.execute(httpPost);
-	          InputStream content = execute.getEntity().getContent();
+	private class DownloadWebPageTask extends WebPageTask {
 
-	          BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
-	          String s = "";
-	          while ((s = buffer.readLine()) != null) {
-	            resp += s;
-	          }
-
-	        } catch (Exception e) {
-	          e.printStackTrace();
-	        }
-	      }
-	      try {
-			response = new JSONObject(resp);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    public DownloadWebPageTask(boolean hasPairs, String username,
+				String password, List<NameValuePair> pairs, boolean isPost) {
+			super(hasPairs, username, password, pairs, isPost);
 		}
-	      return resp;
-	    }
 
-	    @Override
+		@Override
 	    protected void onPostExecute(String result) {
-//	      Log.v(null, response);
-	      
 	      try {
 			if(response.getString("status").equals(c.success())){
 					Log.v(null, "going to pref");
@@ -169,7 +138,13 @@ public class MainActivity extends Activity {
 	  }
 
 	  public void myClickHandler(View view) {
-	    DownloadWebPageTask task = new DownloadWebPageTask();
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("userName", usernameText.getText().toString()));
+		pairs.add(new BasicNameValuePair("id", usernameText.getText().toString()));
+		pairs.add(new BasicNameValuePair("firstName", firstNameText.getText().toString()));
+		pairs.add(new BasicNameValuePair("lastName", lastNameText.getText().toString()));
+		pairs.add(new BasicNameValuePair("hashedPassword", passwordText.getText().toString()));
+	    DownloadWebPageTask task = new DownloadWebPageTask(true, usernameText.getText().toString(), passwordText.getText().toString(), pairs, true);
 	    task.execute(new String[] { c.getBaseUrl()+"addUser" });
 
 	  }
