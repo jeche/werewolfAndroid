@@ -1,0 +1,13 @@
+package edu.wm.werewolf.web;
+
+import android.os.AsyncTask;
+
+public class WebPageTask extends AsyncTask<String, Void, String>{
+
+	@Override
+	protected String doInBackground(String... url) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

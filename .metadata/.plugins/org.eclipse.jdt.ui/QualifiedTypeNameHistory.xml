@@ -11,7 +11,6 @@
 <fullyQualifiedTypeName name="java.io.UnsupportedEncodingException"/>
 <fullyQualifiedTypeName name="org.apache.http.HttpResponse"/>
 <fullyQualifiedTypeName name="org.apache.http.util.EntityUtils"/>
-<fullyQualifiedTypeName name="android.os.AsyncTask"/>
 <fullyQualifiedTypeName name="java.net.URL"/>
 <fullyQualifiedTypeName name="java.io.BufferedReader"/>
 <fullyQualifiedTypeName name="java.io.InputStreamReader"/>
@@ -39,4 +38,6 @@
 <fullyQualifiedTypeName name="java.util.Calendar"/>
 <fullyQualifiedTypeName name="android.widget.Toast"/>
 <fullyQualifiedTypeName name="android.util.Log"/>
+<fullyQualifiedTypeName name="android.widget.Button"/>
+<fullyQualifiedTypeName name="android.os.AsyncTask"/>
 </qualifiedTypeNameHistroy>

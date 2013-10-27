@@ -16,5 +16,6 @@
     <string name="startButtonLabel">Start</string>
     <string name="playerlist">Player List</string>
     <string name="refresh">Refresh</string>
+    <string name="login">Login</string>
 
 </resources>

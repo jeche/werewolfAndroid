@@ -1,0 +1,7 @@
+package edu.wm.werewolf.web;
+
+import android.os.AsyncTask;
+
+public class WebPageTask extends AsyncTask{
+
+}

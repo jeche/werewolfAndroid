@@ -23,8 +23,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.wm.werewolf.constants.Constants;
 import edu.wm.werewolf.service.GameUpdateService;
+import edu.wm.werewolf.web.Constants;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -59,7 +59,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
-      
 		Intent intent = new Intent(this, GameUpdateService.class);
 
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);

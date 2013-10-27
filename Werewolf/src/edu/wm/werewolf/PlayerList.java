@@ -27,7 +27,6 @@ public class PlayerList extends Activity {
 	        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray); 
 	        list.setAdapter(adapter);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
