@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -21,8 +22,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -116,6 +120,18 @@ public class GameStatus extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gamestatus);
+		
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.SECOND, 10);
+		Intent intent = new Intent(this, GameUpdateService.class);
+
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
+      
+		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                    60*1000, pintent);
+		startService(new Intent(getBaseContext(), GameUpdateService.class));
+		
 		timerValue = (TextView) findViewById(R.id.timerValue);
 
 		startButton = (Button) findViewById(R.id.startButton);

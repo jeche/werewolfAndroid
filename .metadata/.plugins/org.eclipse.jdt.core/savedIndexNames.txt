@@ -1,4 +1,3 @@
 INDEX VERSION 1.126+/home/scratch/jlchen/workspace/.metadata/.plugins/org.eclipse.jdt.core
-4075708488.index
 4230150247.index
 3471232375.index

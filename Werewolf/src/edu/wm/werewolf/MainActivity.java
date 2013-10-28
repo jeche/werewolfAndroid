@@ -58,17 +58,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.SECOND, 10);
-		Intent intent = new Intent(this, GameUpdateService.class);
 
-		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
-      
-		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-       //for 30 mint 60*60*1000
-		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                    3*1000, pintent);
-		startService(new Intent(getBaseContext(), GameUpdateService.class));
 		
 		usernameText = (EditText) findViewById(R.id.username);
 		passwordText = (EditText) findViewById(R.id.password);
@@ -77,12 +67,10 @@ public class MainActivity extends Activity {
 		lastNameText = (EditText) findViewById(R.id.lastName);
 		registerButton = (Button) findViewById(R.id.createButton);
 		
-		if (savedInstanceState == null)
-		{
+		if (savedInstanceState == null){
 			username = "";
 		}
-		else
-		{
+		else{
 			username = savedInstanceState.getString("username");
 		}
 		
@@ -113,6 +101,7 @@ public class MainActivity extends Activity {
 		@Override
 	    protected void onPostExecute(String result) {
 	      try {
+	    	response = new JSONObject(result);
 			if(response.getString("status").equals(c.success())){
 					Log.v(null, "going to pref");
 					Context context3 = getApplicationContext();
@@ -131,13 +120,20 @@ public class MainActivity extends Activity {
 					toast3.show();
 			  }
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    }
 	  }
 
 	  public void myClickHandler(View view) {
+		if(!passwordText.getText().toString().equals(verifyPasswordText.getText().toString())){
+		  	Context context3 = getApplicationContext();
+			CharSequence text3 = "Passwords do not match.";
+			int duration3 = Toast.LENGTH_SHORT;
+			Toast toast3 = Toast.makeText(context3, text3, duration3);
+			toast3.show();			
+			return;
+		}
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		pairs.add(new BasicNameValuePair("userName", usernameText.getText().toString()));
 		pairs.add(new BasicNameValuePair("id", usernameText.getText().toString()));
