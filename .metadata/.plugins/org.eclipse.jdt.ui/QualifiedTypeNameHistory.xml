@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="org.apache.http.client.HttpClient"/>
-<fullyQualifiedTypeName name="org.apache.http.client.methods.HttpPost"/>
 <fullyQualifiedTypeName name="org.apache.http.impl.client.DefaultHttpClient"/>
 <fullyQualifiedTypeName name="java.util.List"/>
-<fullyQualifiedTypeName name="org.apache.http.client.entity.UrlEncodedFormEntity"/>
 <fullyQualifiedTypeName name="org.apache.http.message.BasicNameValuePair"/>
 <fullyQualifiedTypeName name="org.apache.http.NameValuePair"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
@@ -28,7 +26,6 @@
 <fullyQualifiedTypeName name="org.json.JSONObject"/>
 <fullyQualifiedTypeName name="org.apache.http.client.methods.HttpGet"/>
 <fullyQualifiedTypeName name="org.json.JSONArray"/>
-<fullyQualifiedTypeName name="edu.wm.werewolf.R.id"/>
 <fullyQualifiedTypeName name="android.widget.ListView"/>
 <fullyQualifiedTypeName name="android.widget.ArrayAdapter"/>
 <fullyQualifiedTypeName name="android.app.Service"/>
@@ -40,4 +37,9 @@
 <fullyQualifiedTypeName name="android.util.Log"/>
 <fullyQualifiedTypeName name="android.widget.Button"/>
 <fullyQualifiedTypeName name="android.os.AsyncTask"/>
+<fullyQualifiedTypeName name="org.apache.http.client.entity.UrlEncodedFormEntity"/>
+<fullyQualifiedTypeName name="org.apache.http.client.methods.HttpPost"/>
+<fullyQualifiedTypeName name="edu.wm.werewolf.web.WebPageTask"/>
+<fullyQualifiedTypeName name="edu.wm.werewolf.web.Constants"/>
+<fullyQualifiedTypeName name="edu.wm.werewolf.R.id"/>
 </qualifiedTypeNameHistroy>

@@ -19,10 +19,16 @@ public class PlayerList extends Activity {
 		
 		try {
 			JSONArray array = new JSONArray(getIntent().getStringExtra("playerList"));
-//			Log.v(null, jsonObj.toString());
+			JSONObject obj;
+			boolean isDead;
 			String[] stringarray = new String[array.length()];
 	        for (int i = 0; i < array.length(); i++) {
-	            stringarray[i] = array.getString(i);
+	            obj = (JSONObject) array.get(i);
+	            isDead = obj.getBoolean("dead");
+	            if(!isDead){
+	            	stringarray[i] = array.getString(i);
+	            }
+	        	
 	        }
 	        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray); 
 	        list.setAdapter(adapter);

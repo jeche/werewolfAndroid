@@ -15,6 +15,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 
@@ -30,8 +31,8 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 	
 	List<NameValuePair> pairs;
 	boolean hasPairs;
-	String username;
-	String password;
+	String username = "admin";
+	String password = "admin";
 	boolean isPost;
 	
 	public WebPageTask(boolean hasPairs, String username, String password,List<NameValuePair> pairs, boolean isPost){
@@ -57,9 +58,9 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 			} catch (URISyntaxException e1) {
 				e1.printStackTrace();
 			}
-			client.getCredentialsProvider().setCredentials(
-					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
-					new UsernamePasswordCredentials("admin", "admin")); // CHANGE TO USERNAME/PASSWORD
+//			client.getCredentialsProvider().setCredentials(
+//					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
+//					new UsernamePasswordCredentials(username, password)); // CHANGE TO USERNAME/PASSWORD
 
 			
 	        try {
@@ -68,10 +69,16 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 			          if(hasPairs){
 				          	httpPost.setEntity(new UrlEncodedFormEntity(pairs));
 				          }
+			          httpPost.addHeader(BasicScheme.authenticate(
+			        		  new UsernamePasswordCredentials(username, password),
+			        		  "UTF-8", false));
 			          execute = client.execute(httpPost);
 				}
 	        	else{
 					HttpGet httpPost= new HttpGet(url);
+			          httpPost.addHeader(BasicScheme.authenticate(
+			        		  new UsernamePasswordCredentials(username, password),
+			        		  "UTF-8", false));
 					execute = client.execute(httpPost);
 				}
 

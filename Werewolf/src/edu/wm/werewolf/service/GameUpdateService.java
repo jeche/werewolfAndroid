@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class GameUpdateService extends Service{
+	String username;
+	String password;
 
     @Override
    public IBinder onBind(Intent intent) {
@@ -34,6 +36,8 @@ public class GameUpdateService extends Service{
    public int onStartCommand(Intent intent, int flags, int startId) {
           // TODO Auto-generated method stub
 	      Log.v(null, "Run Service run!");
+	      username = (String)intent.getExtras().get("username");
+	      password = (String)intent.getExtras().get("password");
           Toast.makeText(getApplicationContext(), "Service Running ", 1).show();
           return super.onStartCommand(intent, flags, startId);
    }

@@ -44,6 +44,7 @@ public class GameStatus extends Activity {
 	
 	JSONObject response;
 	JSONArray responseArray;
+	boolean isNight;
 	
 	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
 	    @Override
@@ -91,9 +92,11 @@ public class GameStatus extends Activity {
 	    @Override
 	    protected void onPostExecute(String result) {
 	    	Log.v(null, "Post executed");
+	    	Log.v(null, "RESULT VAL:" + result);
 	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
 	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	intent.putExtra("playerList", result);
+	    	intent.putExtra("isWerewolf", isWerewolf);
 	    	startActivity(intent);
 
 	    }
@@ -115,6 +118,7 @@ public class GameStatus extends Activity {
 	long timeInMilliseconds = 0L;
 	long timeSwapBuff = 0L;
 	long updatedTime = 0L;
+	boolean isWerewolf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -124,13 +128,18 @@ public class GameStatus extends Activity {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
 		Intent intent = new Intent(this, GameUpdateService.class);
-
+		intent.putExtra("username", getIntent().getExtras().getString("username"));
+		intent.putExtra("password", getIntent().getExtras().getString("password"));
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
-      
+		isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
+		isNight = getIntent().getExtras().getString("isNight").contains("true");
 		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
                     60*1000, pintent);
-		startService(new Intent(getBaseContext(), GameUpdateService.class));
+		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
+		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
+		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
+		startService(serviceIntent);
 		
 		timerValue = (TextView) findViewById(R.id.timerValue);
 
@@ -140,7 +149,12 @@ public class GameStatus extends Activity {
 			public void onClick(View view) {
 				if(!clicked){
 					DownloadWebPageTask task = new DownloadWebPageTask();
-				    task.execute(new String[] { c.getBaseUrl()+"players/alive" });
+					if(!isWerewolf || !isNight){				    
+						task.execute(new String[] { c.getBaseUrl()+"players/alive" });
+					}
+					else{
+						task.execute(new String[] { c.getBaseUrl()+"players/scent", c.getBaseUrl()+"players/alive" });
+					}
 				}
 			}
 			});

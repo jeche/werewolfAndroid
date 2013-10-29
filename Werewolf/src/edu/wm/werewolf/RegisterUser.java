@@ -37,7 +37,9 @@ public class RegisterUser extends Activity {
 
 		@Override
 	    protected void onPostExecute(String result) {
+			
 	      try {
+	    	response = new JSONObject(result);
 			if(response.getString("status").equals(c.success())){
 					Log.v(null, "going to gamestatus");
 					Context context3 = getApplicationContext();
@@ -49,6 +51,8 @@ public class RegisterUser extends Activity {
 					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent2.putExtra("username", usernameText.getText().toString());
 					intent2.putExtra("password", passwordText.getText().toString());
+					intent2.putExtra("isWerewolf", response.getBoolean("isWerewolf"));
+					intent2.putExtra("isNight", response.getString("gameStatus"));
 					startActivity(intent2);
 			  }else{
 				  	Context context3 = getApplicationContext();
@@ -73,8 +77,8 @@ public class RegisterUser extends Activity {
 		loginButton = (Button) findViewById(R.id.button2);
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-			    DownloadWebPageTask task = new DownloadWebPageTask(false, null, null, null, false);
-			    task.execute(new String[] { c.getBaseUrl()+ "gameStatus" });
+			    DownloadWebPageTask task = new DownloadWebPageTask(false, usernameText.getText().toString(), passwordText.getText().toString(), null, false);
+			    task.execute(new String[] { c.getBaseUrl()+ "gameStats" });
 			}
 			});
 		registerButton = (Button) findViewById(R.id.button1);
