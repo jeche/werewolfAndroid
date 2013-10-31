@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
+import edu.wm.werewolf.web.WebPageTask;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -45,60 +46,28 @@ public class GameStatus extends Activity {
 	JSONObject response;
 	JSONArray responseArray;
 	boolean isNight;
+	String username;
+	String password;
 	
-	private class DownloadWebPageTask extends AsyncTask<String, Void, String> {
-	    @Override
-	    protected String doInBackground(String... urls) {
-	      String resp = "";
-	      for (String url : urls) {
-	        DefaultHttpClient client = new DefaultHttpClient();
-	        URI uri = null;
-			try {
-				uri = new URI(url);
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
-			}
-	        HttpGet httpPost= new HttpGet(url);
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-			client.getCredentialsProvider().setCredentials(
-					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
-					new UsernamePasswordCredentials("admin", "admin"));
-	        try {
-//	          httpPost.setEntity(new UrlEncodedFormEntity(pairs));
-	          HttpResponse execute = client.execute(httpPost);
-	          InputStream content = execute.getEntity().getContent();
+	private class DownloadWebPageTask extends WebPageTask {
 
-	          BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
-	          String s = "";
-	          while ((s = buffer.readLine()) != null) {
-	            resp += s;
-	          }
+	    public DownloadWebPageTask(boolean hasPairs, String username,
+				String password, List<NameValuePair> pairs, boolean isPost) {
+			super(hasPairs, username, password, pairs, isPost);
+		}
 
-	        } catch (Exception e) {
-	          e.printStackTrace();
-	        }
-	      }
-	      Log.v(null, resp);
-	      
-//	      try {
-//			responseArray = new JSONArray(resp);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	      return resp;
-	    }
-
-	    @Override
+		@Override
 	    protected void onPostExecute(String result) {
+	    	clicked = false;
 	    	Log.v(null, "Post executed");
 	    	Log.v(null, "RESULT VAL:" + result);
 	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
 	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	intent.putExtra("playerList", result);
 	    	intent.putExtra("isWerewolf", isWerewolf);
+	    	intent.putExtra("username", username);
+	    	intent.putExtra("password", password);
 	    	startActivity(intent);
-
 	    }
 	  }
 	
@@ -128,8 +97,10 @@ public class GameStatus extends Activity {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
 		Intent intent = new Intent(this, GameUpdateService.class);
-		intent.putExtra("username", getIntent().getExtras().getString("username"));
-		intent.putExtra("password", getIntent().getExtras().getString("password"));
+		username = getIntent().getExtras().getString("username") ;
+		intent.putExtra("username", username);
+		password = getIntent().getExtras().getString("password");
+		intent.putExtra("password", password);
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
 		isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
 		isNight = getIntent().getExtras().getString("isNight").contains("true");
@@ -148,12 +119,13 @@ public class GameStatus extends Activity {
 		playerListButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				if(!clicked){
-					DownloadWebPageTask task = new DownloadWebPageTask();
+					clicked = true;
+					DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, null, false);
 					if(!isWerewolf || !isNight){				    
 						task.execute(new String[] { c.getBaseUrl()+"players/alive" });
 					}
 					else{
-						task.execute(new String[] { c.getBaseUrl()+"players/scent", c.getBaseUrl()+"players/alive" });
+						task.execute(new String[] { c.getBaseUrl()+"players/scent"});
 					}
 				}
 			}

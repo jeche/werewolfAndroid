@@ -17,6 +17,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 
 import edu.wm.werewolf.GameStatus;
@@ -61,6 +63,7 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 //			client.getCredentialsProvider().setCredentials(
 //					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
 //					new UsernamePasswordCredentials(username, password)); // CHANGE TO USERNAME/PASSWORD
+			System.out.println(username + " " + password);
 
 			
 	        try {
@@ -76,6 +79,13 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 				}
 	        	else{
 					HttpGet httpPost= new HttpGet(url);
+			          if(hasPairs){
+			        	  BasicHttpParams h = new BasicHttpParams();
+			        	  for(int i = 0; i < pairs.size(); i++){
+			        		  h.setParameter(pairs.get(i).getName(), pairs.get(i).getValue());
+			        	  }
+				          httpPost.setParams(h);
+				      }
 			          httpPost.addHeader(BasicScheme.authenticate(
 			        		  new UsernamePasswordCredentials(username, password),
 			        		  "UTF-8", false));

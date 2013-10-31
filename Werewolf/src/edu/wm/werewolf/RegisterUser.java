@@ -63,7 +63,12 @@ public class RegisterUser extends Activity {
 			  }
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Context context3 = getApplicationContext();
+			CharSequence text3 = "Authentication Failed.";
+			int duration3 = Toast.LENGTH_SHORT;
+			Toast toast3 = Toast.makeText(context3, text3, duration3);
+			toast3.show();
+//			e.printStackTrace();
 		}
 	    }
 	  }
