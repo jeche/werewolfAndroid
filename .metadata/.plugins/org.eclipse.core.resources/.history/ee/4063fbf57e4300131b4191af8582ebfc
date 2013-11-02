@@ -25,7 +25,6 @@ public class RegisterUser extends Activity {
 	Button loginButton;
 	EditText usernameText;
 	EditText passwordText;
-	boolean clicked = false;
 	private JSONObject response;
 	Constants c= new Constants();
 	
@@ -52,11 +51,7 @@ public class RegisterUser extends Activity {
 					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent2.putExtra("username", usernameText.getText().toString());
 					intent2.putExtra("password", passwordText.getText().toString());
-					if(response.get("isWerewolf") != null){
-						intent2.putExtra("isWerewolf", response.getBoolean("isWerewolf"));
-					}else{
-						intent2.putExtra("isWerewolf", false);
-					}
+					intent2.putExtra("isWerewolf", response.getBoolean("isWerewolf"));
 					intent2.putExtra("isNight", response.getString("gameStatus"));
 					startActivity(intent2);
 			  }else{
@@ -75,7 +70,6 @@ public class RegisterUser extends Activity {
 			toast3.show();
 //			e.printStackTrace();
 		}
-	      clicked = false;
 	    }
 	  }
 	
@@ -88,25 +82,18 @@ public class RegisterUser extends Activity {
 		loginButton = (Button) findViewById(R.id.button2);
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				if(!clicked){
-					DownloadWebPageTask task = new DownloadWebPageTask(false, usernameText.getText().toString(), passwordText.getText().toString(), null, false);
-					task.execute(new String[] { c.getBaseUrl()+ "gameStats" });
-					clicked = true;
-				}
+			    DownloadWebPageTask task = new DownloadWebPageTask(false, usernameText.getText().toString(), passwordText.getText().toString(), null, false);
+			    task.execute(new String[] { c.getBaseUrl()+ "gameStats" });
 			}
 			});
 		registerButton = (Button) findViewById(R.id.button1);
 		registerButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				if(!clicked){
-					clicked = true;
-					Log.v(null, "going to registration");
-				
-					Context context3 = getApplicationContext();
-					Intent intent2 = new Intent(context3, MainActivity.class);
-					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent2);
-				}
+				Log.v(null, "going to registration");
+				Context context3 = getApplicationContext();
+				Intent intent2 = new Intent(context3, MainActivity.class);
+				intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent2);
 			}
 			});
 	}

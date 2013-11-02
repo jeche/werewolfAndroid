@@ -57,6 +57,11 @@ public class RegisterUser extends Activity {
 					}else{
 						intent2.putExtra("isWerewolf", false);
 					}
+//					if(response.get("isNight") != null){
+//						intent2.putExtra("isNight", response.getBoolean("isNight"));
+//					}else{
+//						intent2.putExtra("isNight", false);
+//					}
 					intent2.putExtra("isNight", response.getString("gameStatus"));
 					startActivity(intent2);
 			  }else{

@@ -105,31 +105,6 @@ public class GameStatus extends Activity {
 		isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
 		isNight = getIntent().getExtras().getString("isNight").contains("true");
 		timerValue = (TextView) findViewById(R.id.timerValue);
-		playerListButton = (Button) findViewById(R.id.playerlist);
-		playerListButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View view) {
-				if(!clicked){
-					clicked = true;
-					DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, null, false);
-					if(!isWerewolf || !isNight){				    
-						task.execute(new String[] { c.getBaseUrl()+"players/alive" });
-					}
-					else{
-						task.execute(new String[] { c.getBaseUrl()+"players/scent"});
-					}
-				}
-			}
-			});
-		
-		refreshButton = (Button) findViewById(R.id.refresh);
-		refreshButton.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View view) {
-				startTime = SystemClock.uptimeMillis();
-				customHandler.postDelayed(updateTimerThread, 0);
-
-			}
-		});
 		if(getIntent().getExtras().getString("isNight").equals("isOver")){
 			timerValue.setText("No game currently running.");
 		}else{

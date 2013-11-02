@@ -25,7 +25,7 @@ public class RegisterUser extends Activity {
 	Button loginButton;
 	EditText usernameText;
 	EditText passwordText;
-	boolean clicked = false;
+	boolean clicked;
 	private JSONObject response;
 	Constants c= new Constants();
 	
@@ -57,6 +57,11 @@ public class RegisterUser extends Activity {
 					}else{
 						intent2.putExtra("isWerewolf", false);
 					}
+//					if(response.get("isNight") != null){
+//						intent2.putExtra("isNight", response.getBoolean("isNight"));
+//					}else{
+//						intent2.putExtra("isNight", false);
+//					}
 					intent2.putExtra("isNight", response.getString("gameStatus"));
 					startActivity(intent2);
 			  }else{
@@ -75,7 +80,6 @@ public class RegisterUser extends Activity {
 			toast3.show();
 //			e.printStackTrace();
 		}
-	      clicked = false;
 	    }
 	  }
 	

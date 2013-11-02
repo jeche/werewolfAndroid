@@ -104,7 +104,19 @@ public class GameStatus extends Activity {
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
 		isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
 		isNight = getIntent().getExtras().getString("isNight").contains("true");
+		if(getIntent().getExtras().getString("isNight").equals("isOver")){
+			
+		}else{
+		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                    60*1000, pintent);
+		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
+		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
+		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
+		startService(serviceIntent);
 		timerValue = (TextView) findViewById(R.id.timerValue);
+
+		startButton = (Button) findViewById(R.id.startButton);
 		playerListButton = (Button) findViewById(R.id.playerlist);
 		playerListButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
@@ -130,17 +142,8 @@ public class GameStatus extends Activity {
 
 			}
 		});
-		if(getIntent().getExtras().getString("isNight").equals("isOver")){
-			timerValue.setText("No game currently running.");
-		}else{
-		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                    60*1000, pintent);
-		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
-		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
-		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-		startService(serviceIntent);
-		startButton = (Button) findViewById(R.id.startButton);		
+		
+
 		startButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {

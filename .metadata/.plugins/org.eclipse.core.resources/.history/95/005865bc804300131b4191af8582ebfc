@@ -130,6 +130,7 @@ public class GameStatus extends Activity {
 
 			}
 		});
+
 		if(getIntent().getExtras().getString("isNight").equals("isOver")){
 			timerValue.setText("No game currently running.");
 		}else{
