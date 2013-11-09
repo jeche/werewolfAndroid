@@ -41,7 +41,7 @@ public class RegisterUser extends Activity {
 			
 	      try {
 	    	response = new JSONObject(result);
-			if(response.getString("status").equals(c.success())){
+			if(response.getString(c.responseStatus()).equals(c.success())){
 					Log.v(null, "going to gamestatus");
 					Context context3 = getApplicationContext();
 					CharSequence text3 = "Going to Game Status";
@@ -52,14 +52,16 @@ public class RegisterUser extends Activity {
 					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent2.putExtra("username", usernameText.getText().toString());
 					intent2.putExtra("password", passwordText.getText().toString());
-					if(response.get("isWerewolf") != null){
-						intent2.putExtra("isWerewolf", response.getBoolean("isWerewolf"));
+					if(response.getString(c.isWerewolf())!=null){
+						intent2.putExtra(c.isWerewolf(), response.getBoolean(c.isWerewolf()));
 					}else{
-						intent2.putExtra("isWerewolf", false);
+						intent2.putExtra(c.isWerewolf(), false);
 					}
-					intent2.putExtra("isNight", response.getString("gameStatus"));
+					intent2.putExtra(c.getGameStatus(), response.getString(c.getGameStatus()));
 					startActivity(intent2);
+					
 			  }else{
+		
 				  	Context context3 = getApplicationContext();
 					CharSequence text3 = "Authentication Failed.";
 					int duration3 = Toast.LENGTH_SHORT;
@@ -68,12 +70,13 @@ public class RegisterUser extends Activity {
 			  }
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
+		
 			Context context3 = getApplicationContext();
 			CharSequence text3 = "Authentication Failed.";
 			int duration3 = Toast.LENGTH_SHORT;
 			Toast toast3 = Toast.makeText(context3, text3, duration3);
 			toast3.show();
-//			e.printStackTrace();
+			e.printStackTrace();
 		}
 	      clicked = false;
 	    }
@@ -90,7 +93,7 @@ public class RegisterUser extends Activity {
 			public void onClick(View view) {
 				if(!clicked){
 					DownloadWebPageTask task = new DownloadWebPageTask(false, usernameText.getText().toString(), passwordText.getText().toString(), null, false);
-					task.execute(new String[] { c.getBaseUrl()+ "gameStats" });
+					task.execute(new String[] {c.statusURL()});
 					clicked = true;
 				}
 			}

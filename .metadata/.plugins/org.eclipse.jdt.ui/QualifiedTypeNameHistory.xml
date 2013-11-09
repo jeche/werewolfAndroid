@@ -50,4 +50,6 @@
 <fullyQualifiedTypeName name="org.json.JSONObject"/>
 <fullyQualifiedTypeName name="org.apache.http.params.HttpParams"/>
 <fullyQualifiedTypeName name="org.apache.http.params.BasicHttpParams"/>
+<fullyQualifiedTypeName name="org.apache.http.client.utils.URLEncodedUtils"/>
+<fullyQualifiedTypeName name="org.apache.http.client.methods.HttpRequestBase"/>
 </qualifiedTypeNameHistroy>

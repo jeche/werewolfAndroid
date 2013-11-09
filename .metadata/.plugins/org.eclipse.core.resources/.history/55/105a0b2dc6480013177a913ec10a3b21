@@ -1,0 +1,44 @@
+package edu.wm.werewolf.web;
+
+public class Constants {
+	static private String url = "http://secure-lake-6285.herokuapp.com/";
+	static private String success = "success";
+	static private String status = "gameStats";
+	static private String addUser = "addUser";
+	static private String players = "players";
+	static private String getInfo = "getinfo";
+	static private String alive = "alive";
+	static private String scent = "scent";
+	
+	public Constants(){
+		
+	}
+	
+	public String getBaseUrl(){
+		return url;
+	}
+	
+	public String success(){
+		return url+success;
+	}
+	
+	public String status(){
+		return url+status;
+	}
+	
+	public String addUser(){
+		return url+addUser;
+	}
+	
+	public String getInfo(){
+		return url+players+getInfo;
+	}
+	
+	public String scent(){
+		return url+players+scent;
+	}
+	
+	public String alive(){
+		return url+players+alive;
+	}
+}

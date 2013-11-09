@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
 	    protected void onPostExecute(String result) {
 	      try {
 	    	response = new JSONObject(result);
-			if(response.getString("status").equals(c.success())){
+			if(response.getString(c.responseStatus()).equals(c.success())){
 					Log.v(null, "going to pref");
 					Context context3 = getApplicationContext();
 					CharSequence text3 = "Successful Registration!";
@@ -141,7 +141,7 @@ public class MainActivity extends Activity {
 		pairs.add(new BasicNameValuePair("lastName", lastNameText.getText().toString()));
 		pairs.add(new BasicNameValuePair("hashedPassword", passwordText.getText().toString()));
 	    DownloadWebPageTask task = new DownloadWebPageTask(true, usernameText.getText().toString(), passwordText.getText().toString(), pairs, true);
-	    task.execute(new String[] { c.getBaseUrl()+"addUser" });
+	    task.execute(new String[] { c.addUserURL() });
 
 	  }
 

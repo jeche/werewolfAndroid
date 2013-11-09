@@ -58,7 +58,7 @@ public class PlayerList extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_playerlist);
 		list = (ListView) findViewById(R.id.listView1);
-		boolean isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
+		boolean isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		username = getIntent().getExtras().getString("username");
 		password = getIntent().getExtras().getString("password");
 		scentList = new ArrayList<String>();
@@ -73,7 +73,7 @@ public class PlayerList extends Activity {
 			List<String> stringList = new ArrayList<String>();
 	        for (int i = 0; i < array.length(); i++) {
 	            obj = (JSONObject) array.get(i);
-	            isDead = obj.getBoolean("dead");
+	            isDead = obj.getBoolean(c.isDead());
 	            if(isWerewolf){
 	            	score = obj.getInt("score");
 	            }
@@ -117,7 +117,7 @@ public class PlayerList extends Activity {
 	        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 	        			pairs.add(new BasicNameValuePair("player", player));
 	        			DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, false);
-	        			task.execute(new String[] { c.getBaseUrl()+"players/getinfo" });
+	        			task.execute(new String[] { c.getInfoURL() });
 	        			clicked = true;
 	        		}
 	               

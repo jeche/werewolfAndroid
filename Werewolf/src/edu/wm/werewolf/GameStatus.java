@@ -64,7 +64,7 @@ public class GameStatus extends Activity {
 	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
 	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	intent.putExtra("playerList", result);
-	    	intent.putExtra("isWerewolf", isWerewolf);
+	    	intent.putExtra(c.isWerewolf(), isWerewolf);
 	    	intent.putExtra("username", username);
 	    	intent.putExtra("password", password);
 	    	startActivity(intent);
@@ -88,6 +88,7 @@ public class GameStatus extends Activity {
 	long timeSwapBuff = 0L;
 	long updatedTime = 0L;
 	boolean isWerewolf;
+	long created = 0L;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -96,14 +97,17 @@ public class GameStatus extends Activity {
 		
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
+		
 		Intent intent = new Intent(this, GameUpdateService.class);
+		
 		username = getIntent().getExtras().getString("username") ;
 		intent.putExtra("username", username);
 		password = getIntent().getExtras().getString("password");
 		intent.putExtra("password", password);
-		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
-		isWerewolf = getIntent().getExtras().getBoolean("isWerewolf");
-		isNight = getIntent().getExtras().getString("isNight").contains("true");
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
+		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
+		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
+		
 		timerValue = (TextView) findViewById(R.id.timerValue);
 		playerListButton = (Button) findViewById(R.id.playerlist);
 		playerListButton.setOnClickListener(new View.OnClickListener() {
@@ -112,10 +116,10 @@ public class GameStatus extends Activity {
 					clicked = true;
 					DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, null, false);
 					if(!isWerewolf || !isNight){				    
-						task.execute(new String[] { c.getBaseUrl()+"players/alive" });
+						task.execute(new String[] {c.aliveURL() });
 					}
 					else{
-						task.execute(new String[] { c.getBaseUrl()+"players/scent"});
+						task.execute(new String[] { c.scentURL()});
 					}
 				}
 			}
@@ -130,9 +134,10 @@ public class GameStatus extends Activity {
 
 			}
 		});
-		if(getIntent().getExtras().getString("isNight").equals("isOver")){
+		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver")){
 			timerValue.setText("No game currently running.");
-		}else{
+			timerValue.setTextSize(20);
+		}
 		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
                     60*1000, pintent);
@@ -161,7 +166,7 @@ public class GameStatus extends Activity {
 
 			}
 		});
-		}
+		
 
 	}
 

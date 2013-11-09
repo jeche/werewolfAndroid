@@ -15,6 +15,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -78,14 +80,23 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 			          execute = client.execute(httpPost);
 				}
 	        	else{
-					HttpGet httpPost= new HttpGet(url);
+	        		  HttpGet httpPost= new HttpGet(url);
+	        		  URI uril;
 			          if(hasPairs){
-			        	  BasicHttpParams h = new BasicHttpParams();
-			        	  for(int i = 0; i < pairs.size(); i++){
-			        		  h.setParameter(pairs.get(i).getName(), pairs.get(i).getValue());
-			        	  }
-				          httpPost.setParams(h);
+//			        	  BasicHttpParams h = new BasicHttpParams();
+//			        	  for(int i = 0; i < pairs.size(); i++){
+//			        		  h.setParameter(pairs.get(i).getName(), pairs.get(i).getValue());
+//			        	  }
+//				          httpPost.setParams(h);
+			        	  String paramString = URLEncodedUtils.format(pairs, "utf-8");
+			        	  url = url + paramString;
+	
+			        	  uril = new URIBuilder(httpPost.getURI()).addParameter("q",
+			        		        "That was easy!").build();
+
+			        		((HttpRequestBase) httpPost).setURI(uril);//			        	  HttpGet httpGet = new HttpGet(url);
 				      }
+			          
 			          httpPost.addHeader(BasicScheme.authenticate(
 			        		  new UsernamePasswordCredentials(username, password),
 			        		  "UTF-8", false));
@@ -111,31 +122,6 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 	}
 	
     @Override
-    protected void onPostExecute(String result) {
-//      Log.v(null, response);
-//      
-//      try {
-//		if(response.getString("status").equals(c.success())){
-//				Log.v(null, "going to pref");
-//				Context context3 = getApplicationContext();
-//				CharSequence text3 = "Successful Registration!";
-//				int duration3 = Toast.LENGTH_SHORT;
-//				Toast toast3 = Toast.makeText(context3, text3, duration3);
-//				toast3.show();
-//				Intent intent2 = new Intent(context3, GameStatus.class);
-//				intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//				startActivity(intent2);
-//		  }else{
-//			  	Context context3 = getApplicationContext();
-//				CharSequence text3 = "There was an error creating your account.";
-//				int duration3 = Toast.LENGTH_SHORT;
-//				Toast toast3 = Toast.makeText(context3, text3, duration3);
-//				toast3.show();
-//		  }
-//	} catch (JSONException e) {
-//		// TODO Auto-generated catch block
-//		e.printStackTrace();
-//	}
-    }
+    protected void onPostExecute(String result) {}
 
 }
