@@ -1,3 +1,8 @@
+com.android.ide.eclipse.ddms.logcat.level=20
+com.android.ide.eclipse.ddms.logcat.message=1338
+com.android.ide.eclipse.ddms.logcat.pid=44
+com.android.ide.eclipse.ddms.logcat.tag=76
+com.android.ide.eclipse.ddms.logcat.time=124
 ddms.logcat.auotmonitor.level=info
 ddms.logcat.automonitor.userprompt=true
 eclipse.preferences.version=1

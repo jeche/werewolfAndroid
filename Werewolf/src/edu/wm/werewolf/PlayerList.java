@@ -115,9 +115,9 @@ public class PlayerList extends Activity {
 	                // selected item
 	        		if(!clicked){
 	        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-	        			pairs.add(new BasicNameValuePair("player", player));
-	        			DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, false);
-	        			task.execute(new String[] { c.getInfoURL() });
+	        			pairs.add(new BasicNameValuePair("playername", player));
+	        			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, pairs, false);
+	        			task.execute(new String[] { c.getInfoURL() +"/" + player });
 	        			clicked = true;
 	        		}
 	               

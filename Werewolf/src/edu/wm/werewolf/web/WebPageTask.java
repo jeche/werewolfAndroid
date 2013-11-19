@@ -80,22 +80,33 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 			          execute = client.execute(httpPost);
 				}
 	        	else{
-	        		  HttpGet httpPost= new HttpGet(url);
-	        		  URI uril;
 			          if(hasPairs){
-//			        	  BasicHttpParams h = new BasicHttpParams();
-//			        	  for(int i = 0; i < pairs.size(); i++){
-//			        		  h.setParameter(pairs.get(i).getName(), pairs.get(i).getValue());
-//			        	  }
-//				          httpPost.setParams(h);
-			        	  String paramString = URLEncodedUtils.format(pairs, "utf-8");
-			        	  url = url + paramString;
+		        		  if(!url.endsWith("/"))
+		        		        url += "/";
+//		        		  pairs.g
+//			        	  String paramString = URLEncodedUtils.format(pairs, "utf-8");
+//			        	  url = url + paramString;
 	
-			        	  uril = new URIBuilder(httpPost.getURI()).addParameter("q",
-			        		        "That was easy!").build();
+//			        	  uril = new URIBuilder(httpPost.getURI()).addParameter("q",
+//			        		        "That was easy!").build();
 
-			        		((HttpRequestBase) httpPost).setURI(uril);//			        	  HttpGet httpGet = new HttpGet(url);
+//			        		((HttpRequestBase) httpPost).setURI(uril);//			        	  HttpGet httpGet = new HttpGet(url);
+			        	  System.out.println(url);
 				      }
+	        		  HttpGet httpPost= new HttpGet(url);
+//	        		  URI uril;
+//	        		  if(!url.endsWith("?"))
+//	        		        url += "?";
+//			          if(hasPairs){
+//
+//			        	  String paramString = URLEncodedUtils.format(pairs, "utf-8");
+//			        	  url = url + paramString;
+//	
+////			        	  uril = new URIBuilder(httpPost.getURI()).addParameter("q",
+////			        		        "That was easy!").build();
+//
+////			        		((HttpRequestBase) httpPost).setURI(uril);//			        	  HttpGet httpGet = new HttpGet(url);
+//				      }
 			          
 			          httpPost.addHeader(BasicScheme.authenticate(
 			        		  new UsernamePasswordCredentials(username, password),
