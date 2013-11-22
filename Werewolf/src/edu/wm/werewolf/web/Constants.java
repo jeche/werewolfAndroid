@@ -13,6 +13,7 @@ public class Constants {
 	static private String isWerewolf = "isWerewolf";
 	static private String responseStatus = "status";
 	static private String kills = "kills";
+	static private String kill = "/kill";
 	static private String createTime = "created";
 	static private String isDead = "dead";
 	static private String nightFreq = "nightFreq";
@@ -20,6 +21,10 @@ public class Constants {
 	
 	public Constants(){
 		
+	}
+	
+	public String kill(){
+		return url + players + kill;
 	}
 	
 	public String nightFreq(){

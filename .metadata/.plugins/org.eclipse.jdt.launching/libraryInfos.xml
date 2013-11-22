@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <libraryInfos>
-<libraryInfo home="/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0" version="1.7.0_40">
+<libraryInfo home="/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0" version="1.7.0_45">
 <bootpath>
 <entry path="/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0/jre/lib/resources.jar"/>
 <entry path="/usr/lib64/jvm/java-1.7.0-openjdk-1.7.0/jre/lib/rt.jar"/>

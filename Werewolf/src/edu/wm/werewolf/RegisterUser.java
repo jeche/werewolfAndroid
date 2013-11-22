@@ -98,7 +98,7 @@ public class RegisterUser extends Activity {
 				}
 			}
 			});
-		registerButton = (Button) findViewById(R.id.button1);
+		registerButton = (Button) findViewById(R.id.profile_button);
 		registerButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				if(!clicked){

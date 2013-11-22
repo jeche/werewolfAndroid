@@ -49,6 +49,8 @@ public class PlayerList extends Activity {
 			Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
 	    	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	i.putExtra("playerinfo", result);
+	    	i.putExtra("username", username);
+	    	i.putExtra("password", password);
 //	    	intent.putExtra("isWerewolf", isWerewolf);
 	    	startActivity(i);
 	    }

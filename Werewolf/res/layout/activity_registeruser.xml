@@ -4,7 +4,7 @@
     android:layout_height="match_parent" >
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/profile_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -16,8 +16,8 @@
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
-        android:layout_alignRight="@+id/button1"
+        android:layout_above="@+id/profile_button"
+        android:layout_alignRight="@+id/profile_button"
         android:text="@string/login" />
 
     <EditText
@@ -33,7 +33,7 @@
     </EditText>
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/player_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/editText1"
@@ -46,8 +46,8 @@
         android:id="@+id/editText2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView1"
-        android:layout_alignLeft="@+id/textView1"
+        android:layout_above="@+id/player_status"
+        android:layout_alignLeft="@+id/player_status"
         android:ems="10" />
 
     <TextView
