@@ -23,6 +23,10 @@ public class Constants {
 		
 	}
 	
+	public String createTime(){
+		return createTime;
+	}
+	
 	public String kill(){
 		return url + players + kill;
 	}
@@ -33,10 +37,6 @@ public class Constants {
 	
 	public String isDead(){
 		return isDead;
-	}
-	
-	public String createTime(){
-		return createTime;
 	}
 	
 	public String kills(){

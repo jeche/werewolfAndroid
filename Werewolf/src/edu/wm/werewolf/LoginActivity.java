@@ -20,7 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class RegisterUser extends Activity {
+public class LoginActivity extends Activity {
 	Button registerButton;
 	Button loginButton;
 	EditText usernameText;
@@ -58,6 +58,8 @@ public class RegisterUser extends Activity {
 						intent2.putExtra(c.isWerewolf(), false);
 					}
 					intent2.putExtra(c.getGameStatus(), response.getString(c.getGameStatus()));
+					intent2.putExtra(c.createTime(), response.getLong(c.createTime()));
+					intent2.putExtra(c.nightFreq(), response.getLong(c.nightFreq()));
 					startActivity(intent2);
 					
 			  }else{
@@ -106,7 +108,7 @@ public class RegisterUser extends Activity {
 					Log.v(null, "going to registration");
 				
 					Context context3 = getApplicationContext();
-					Intent intent2 = new Intent(context3, MainActivity.class);
+					Intent intent2 = new Intent(context3, RegisterActivity.class);
 					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent2);
 				}

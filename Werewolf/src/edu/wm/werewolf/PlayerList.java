@@ -33,6 +33,7 @@ public class PlayerList extends Activity {
 	List<String> scentList;
 	List<String> killList;
 	Constants c = new Constants();
+
 	
 	private class DownloadWebPageTask extends WebPageTask {
 

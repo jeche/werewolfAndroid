@@ -41,7 +41,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class RegisterActivity extends Activity {
 
 	private EditText usernameText;
 	private EditText passwordText;

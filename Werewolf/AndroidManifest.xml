@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="edu.wm.werewolf.RegisterUser"
+            android:name="edu.wm.werewolf.LoginActivity"
             android:label="@+string/activity_registeruser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +27,7 @@
         <service android:enabled="true" android:name="edu.wm.werewolf.service.GameUpdateService" />
         <activity android:name="edu.wm.werewolf.GameStatus" android:label="@+string/activity_gamestatus"></activity>
         <activity android:name="edu.wm.werewolf.PlayerList" android:label="@+string/activity_playerlist"></activity>
-        <activity android:name="edu.wm.werewolf.MainActivity" android:label="@+string/activity_main" ></activity>
+        <activity android:name="edu.wm.werewolf.RegisterActivity" android:label="@+string/activity_main" ></activity>
         <activity android:name="edu.wm.werewolf.PlayerProfile" android:label="@+string/activity_playerprofile" ></activity>
     </application>
 
