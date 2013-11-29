@@ -54,6 +54,8 @@ public class GameStatus extends Activity {
 	int col;
 	int col2;
 	long color = 0;
+	int n;
+	int d;
 	
 	private class DownloadWebPageTask extends WebPageTask {
 
@@ -105,26 +107,30 @@ public class GameStatus extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gamestatus);
+		n = getResources().getColor(R.color.night);
+		d = getResources().getColor(R.color.day);
 		
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
 		
-		Intent intent = new Intent(this, GameUpdateService.class);
+//		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.gamestatus);
 		username = getIntent().getExtras().getString("username") ;
-		intent.putExtra("username", username);
+//		intent.putExtra("username", username);
 		password = getIntent().getExtras().getString("password");
-		intent.putExtra("password", password);
-		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
+//		intent.putExtra("password", password);
+//		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
-		ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		ProgressBar progressBar = (ProgressBar) findViewById(R.id.balance_bar);
+		progressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
+		progressBar.setProgress(50);
 		if(isNight){
-			col = Color.BLACK;
-			col2 = Color.LTGRAY;
+			col = R.color.night;
+			col2 = R.color.day;
 		}else{
-			col = Color.LTGRAY;
-			col2 = Color.BLACK;
+			col = R.color.day;
+			col2 = R.color.night;
 		}
 		created = getIntent().getExtras().getLong(c.createTime());
 		freq = getIntent().getExtras().getLong(c.nightFreq());
@@ -159,13 +165,13 @@ public class GameStatus extends Activity {
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
 		}
-		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                    60*1000, pintent);
-		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
-		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
-		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-		startService(serviceIntent);
+//		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+//                    60*1000, pintent);
+//		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
+//		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
+//		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
+//		startService(serviceIntent);
 		customHandler.postDelayed(updateTimerThread, 0);
 	}
 
@@ -187,6 +193,7 @@ public class GameStatus extends Activity {
 			
 			newCol = (newCol * 100) / freq;
 			if(newCol < 15 && newCol > 0 && newCol != color){
+				Log.v("color", newCol + " Color fade" + color);
 				int red = Color.red(col);
 				int red2 = Color.red(col2);
 				int blue = Color.blue(col);
@@ -194,26 +201,66 @@ public class GameStatus extends Activity {
 				int green = Color.green(col);
 				int green2 = Color.green(col2);
 				color = newCol;
-				Log.v("color", color + " Color fade");
+				int newRed;
+				int newGreen;
+				int newBlue;
+				newCol = 15 - newCol;
+				if(col == d){
+					 newRed = (int) (red - 51 * newCol / 15);
+					if(newRed < 0){
+						newRed = 0;
+					}
+					newGreen = (int) (green - 25 * newCol / 15);
+					if(newGreen < 25){
+						newGreen = 25;
+					}
+					if(newGreen <= 102){
+						newBlue = (int) (blue - 51 * newCol / 15);
+						if(newBlue < 51){
+							newBlue = 51;
+						}
+					}else{
+						newBlue = 255;
+					}
+				}else{
+					newGreen = (int) (green + 25 * newCol / 15);
+					if(newGreen > 178){
+						newGreen = 178;
+					}
+					newBlue = (int) (blue + 51 * newCol / 15);
+					if(newBlue > 255 || newGreen >= 128){
+						newBlue = 255;
+					}
+					if(newGreen >= 153){
+						newRed = (int) (red + 51 * newCol / 15);
+						if(newRed > 102){
+							newRed = 102;
+						}
+					}else{
+						newRed = 0;
+					}
+				}
 				int goTo;
-				
+				float[] hsv = new float[3];
+				Color.RGBToHSV(red, green, blue, hsv );
 //				newCol = 15 - newCol;
-				goTo = Color.rgb(red + (int)newCol * (red - red2) / 15, green + (int)newCol *(green -green2)/15, blue + (int)newCol * (blue - blue2)/15);
-				
+				goTo = Color.rgb(newRed, newGreen, newBlue);
+//				col = goTo;
+//				goTo = Color.rgb((int) (red + color * (red - red2) / 15), green + (int)color *(green -green2)/15, blue + (int)color *(blue - blue2)/15);
 				
 //				Color.red();
 //				col = col + change / 100;
 				me.setBackgroundColor(goTo);
-			} else if((color2 / freq) % 2 == 0 && col != Color.BLACK){
-				me.setBackgroundColor(Color.BLACK);
+			} else if((color2 / freq) % 2 == 0 && col != n){
+				me.setBackgroundColor(n);
 				Log.v("color", color2 + " night");
-				col = Color.BLACK;
-				col2 = Color.LTGRAY;
-			} else if(col != Color.LTGRAY && (color2 / freq) % 2 == 1){
-				me.setBackgroundColor(Color.LTGRAY);
+				col = n;
+				col2 = d;
+			} else if(col != d && (color2 / freq) % 2 == 1){
+				me.setBackgroundColor(d);
 				Log.v("color", color2 + " day");
-				col = Color.LTGRAY;
-				col2 = Color.BLACK;
+				col = d;
+				col2 = n;
 			}
 			
 			int secs = (int) (updatedTime / 1000);

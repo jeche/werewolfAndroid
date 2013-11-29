@@ -12,6 +12,8 @@ public final class R {
     }
     public static final class color {
         public static final int cyan=0x7f070001;
+        public static final int day=0x7f070003;
+        public static final int night=0x7f070002;
         public static final int red=0x7f070000;
     }
     public static final class dimen {

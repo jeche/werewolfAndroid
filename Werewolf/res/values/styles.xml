@@ -17,5 +17,7 @@
     </style>
     <color name="red">#8b0000</color>
     <color name="cyan">#008b8b</color>
+    <color name="night">#001933</color>
+    <color name="day">#66B2FF</color>
 
 </resources>

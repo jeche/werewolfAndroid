@@ -12,6 +12,7 @@ import edu.wm.werewolf.web.WebPageTask;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -53,15 +54,17 @@ public class PlayerProfile extends Activity {
 	  }
     
     
-    
+    View me;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_playerprofile);
-         
+        me = findViewById(R.id.gamestatus);
+        me.setBackgroundColor(Color.BLACK);
         TextView playerName = (TextView) findViewById(R.id.playername);
 //        TextView 
         TextView playerStatus = (TextView) findViewById(R.id.player_status);
+        playerStatus.setTextColor(Color.WHITE);
         Button playerButton = (Button) findViewById(R.id.profile_button);
         Intent i = getIntent();
         username = i.getStringExtra("username");
