@@ -68,7 +68,7 @@ public class PlayerList extends Activity {
 		killList = new ArrayList<String>();
 		clicked = false;
 		try {
-			JSONArray array = new JSONArray(getIntent().getStringExtra("playerList"));
+			JSONArray array = new JSONArray(getIntent().getStringExtra("player"));
 			JSONObject obj;
 			boolean isDead;
 			int score = 0;

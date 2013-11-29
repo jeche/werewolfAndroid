@@ -21,7 +21,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
@@ -32,19 +31,29 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class GameStatus extends Activity {
+public class GameStatus extends Activity{
 	
 	JSONObject response;
 	JSONArray responseArray;
@@ -56,20 +65,19 @@ public class GameStatus extends Activity {
 	long color = 0;
 	int n;
 	int d;
-	
-	private class DownloadWebPageTask extends WebPageTask {
+	private final static String TAG = "GameStatus";
+	private class DownloadWebPageTask extends WebPageTask{
 
 	    public DownloadWebPageTask(boolean hasPairs, String username,
 				String password, List<NameValuePair> pairs, boolean isPost) {
 			super(hasPairs, username, password, pairs, isPost);
-			System.out.println("");
 		}
 
 		@Override
 	    protected void onPostExecute(String result) {
 	    	clicked = false;
-	    	Log.v(null, "Post executed");
-	    	Log.v(null, "RESULT VAL:" + result);
+	    	Log.v(TAG, "Post executed");
+	    	Log.v(TAG, "RESULT VAL:" + result);
 	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
 	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    	intent.putExtra("playerList", result);
@@ -88,7 +96,7 @@ public class GameStatus extends Activity {
 	private Button playerListButton;
 	private boolean clicked = false;
 	private Constants c = new Constants();
-
+	private ViewFlipper flippy;
 	private TextView timerValue;
 
 	private long startTime = 0L;
@@ -102,24 +110,31 @@ public class GameStatus extends Activity {
 	long created = 0L;
 	long freq = 0L;
 	View me;
+	private ArrayList<String> scentList;
+	private ArrayList<String> killList;
+	private ListView list;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gamestatus);
+		
+		
+		flippy = (ViewFlipper) findViewById(R.id.flippy);
 		n = getResources().getColor(R.color.night);
 		d = getResources().getColor(R.color.day);
 		
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
 		
-//		Intent intent = new Intent(this, GameUpdateService.class);
+		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.gamestatus);
-		username = getIntent().getExtras().getString("username") ;
-//		intent.putExtra("username", username);
+		username = getIntent().getExtras().getString("username");
+		Log.v(TAG, username);
+		intent.putExtra("username", username);
 		password = getIntent().getExtras().getString("password");
-//		intent.putExtra("password", password);
-//		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
+		intent.putExtra("password", password);
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
 		ProgressBar progressBar = (ProgressBar) findViewById(R.id.balance_bar);
@@ -165,14 +180,89 @@ public class GameStatus extends Activity {
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
 		}
-//		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-//		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-//                    60*1000, pintent);
-//		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
-//		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
-//		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-//		startService(serviceIntent);
+		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                    60*1000, pintent);
+		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
+		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
+		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
+		startService(serviceIntent);
 		customHandler.postDelayed(updateTimerThread, 0);
+		
+		
+//		username = getIntent().getExtras().getString("username");
+//		password = getIntent().getExtras().getString("password");
+		list = (ListView) findViewById(R.id.listView1);
+		scentList = new ArrayList<String>();
+		killList = new ArrayList<String>();
+		String[] stringarray = null;
+		try {
+			response = new JSONObject(getIntent().getExtras().getString((c.allPlayers())));
+			JSONArray array = response.getJSONArray("players");
+			Log.w(TAG, response.toString());
+			JSONObject obj;
+			boolean isDead;
+			int score = 0;			
+			stringarray = new String[array.length() - 1];
+			List<String> stringList = new ArrayList<String>();
+	        for (int i = 0; i < array.length(); i++) {
+	            obj = (JSONObject) array.get(i);
+	            isDead = obj.getBoolean(c.isDead());
+	            if(isWerewolf){
+	            	score = obj.getInt("score");
+	            }
+	            
+	            if(!obj.getString("id").equals(username)){
+	            	System.out.println(obj.getString("id") + " username: " +  username);
+	            	stringList.add(obj.getString("id"));
+	            	if(isWerewolf && score > 0){
+	            		scentList.add(obj.getString("id"));
+	            		killList.add(obj.getString("id"));
+	            	}
+	            	
+	            }
+	        	
+	        }
+	        for( int i = 0; i < stringList.size(); i++){
+	        	stringarray[i] = stringList.get(i);
+	        }
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray){
+        	@Override
+        	public View getView(int position, View convertView, ViewGroup parent) {
+	            TextView textView = (TextView) super.getView(position, convertView, parent);
+	            if(scentList.contains(textView.getText().toString())){
+	            	textView.setTextColor(getResources().getColor(R.color.cyan));
+	            }
+	            if(killList.contains(textView.getText().toString())){;
+	            	textView.setTextColor(getResources().getColor(R.color.red));
+	            }
+	            return textView;
+        	}
+        }; 
+		
+		list.setAdapter(adapter);
+        list.setOnItemClickListener(new OnItemClickListener() {
+        	@Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                int position, long id) {
+        		String player = ((TextView) view).getText().toString();
+                // selected item
+        		if(!clicked){
+        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        			pairs.add(new BasicNameValuePair("playername", player));
+        			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, pairs, false);
+        			task.execute(new String[] { c.getInfoURL() +"/" + player });
+        			clicked = true;
+        		}
+               
+            }
+
+          });
 	}
 
 	private Runnable updateTimerThread = new Runnable() {
@@ -272,7 +362,39 @@ public class GameStatus extends Activity {
 //					+ String.format("%03d", milliseconds));
 			customHandler.postDelayed(this, 0);
 		}
-
-	};
+		};
+	private float initialX = 0f;
+	
+	
+	@Override
+    public boolean onTouchEvent(MotionEvent touchevent) {
+        switch (touchevent.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            initialX = touchevent.getX();
+            break;
+        case MotionEvent.ACTION_UP:
+            float finalX = touchevent.getX();
+            if (initialX  > finalX) {
+                if (flippy.getDisplayedChild() == 1)
+                    break;
+ 
+                flippy.setInAnimation(this, R.anim.in_right);
+                flippy.setOutAnimation(this, R.anim.out_left);
+ 
+                flippy.showNext();
+            } else {
+                if (flippy.getDisplayedChild() == 0)
+                    break;
+ 
+                flippy.setInAnimation(this, R.anim.in_left);
+                flippy.setOutAnimation(this, R.anim.out_right);
+ 
+                flippy.showPrevious();
+            }
+            break;
+        }
+        return false;
+    }
+   
 
 }

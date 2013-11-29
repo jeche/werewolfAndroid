@@ -23,7 +23,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
 

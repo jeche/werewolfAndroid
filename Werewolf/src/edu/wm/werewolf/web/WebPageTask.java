@@ -65,7 +65,7 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 //			client.getCredentialsProvider().setCredentials(
 //					new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_SCHEME),
 //					new UsernamePasswordCredentials(username, password)); // CHANGE TO USERNAME/PASSWORD
-			System.out.println(username + " " + password);
+//			System.out.println(username + " " + password);
 
 			
 	        try {
@@ -91,7 +91,7 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 //			        		        "That was easy!").build();
 
 //			        		((HttpRequestBase) httpPost).setURI(uril);//			        	  HttpGet httpGet = new HttpGet(url);
-			        	  System.out.println(url);
+//			        	  System.out.println(url);
 				      }
 	        		  HttpGet httpPost= new HttpGet(url);
 //	        		  URI uril;
@@ -127,7 +127,7 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 	          e.printStackTrace();
 	        }
 	      }
-	      Log.v(null, resp);
+//	      Log.v(null, resp);
 	      
 	      return resp;
 	}

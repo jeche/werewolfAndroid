@@ -59,7 +59,7 @@ public class PlayerProfile extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_playerprofile);
-        me = findViewById(R.id.gamestatus);
+        me = findViewById(R.id.playerprofile);
         me.setBackgroundColor(Color.BLACK);
         TextView playerName = (TextView) findViewById(R.id.playername);
 //        TextView 

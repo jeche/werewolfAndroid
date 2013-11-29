@@ -17,10 +17,15 @@ public class Constants {
 	static private String createTime = "created";
 	static private String isDead = "dead";
 	static private String nightFreq = "nightFreq";
+	static private String updateloc = "/location";
 	
 	
 	public Constants(){
 		
+	}
+	
+	public String updateLocation(){
+		return url + players + updateloc;
 	}
 	
 	public String createTime(){

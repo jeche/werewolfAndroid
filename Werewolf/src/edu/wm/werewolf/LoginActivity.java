@@ -28,6 +28,7 @@ public class LoginActivity extends Activity {
 	boolean clicked = false;
 	private JSONObject response;
 	Constants c= new Constants();
+	private static final String TAG = "LoginActivity";
 	
 	private class DownloadWebPageTask extends WebPageTask {
 
@@ -60,6 +61,9 @@ public class LoginActivity extends Activity {
 					intent2.putExtra(c.getGameStatus(), response.getString(c.getGameStatus()));
 					intent2.putExtra(c.createTime(), response.getLong(c.createTime()));
 					intent2.putExtra(c.nightFreq(), response.getLong(c.nightFreq()));
+					intent2.putExtra(c.allPlayers(), response.toString());
+					Log.v(TAG, response.toString());
+					Log.v(TAG, response.get("players").toString());
 					startActivity(intent2);
 					
 			  }else{
