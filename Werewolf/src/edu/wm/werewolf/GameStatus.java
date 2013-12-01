@@ -1,22 +1,10 @@
 package edu.wm.werewolf;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,20 +12,16 @@ import org.json.JSONObject;
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
-import android.R.color;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,7 +29,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -63,6 +46,7 @@ public class GameStatus extends Activity{
 	int col;
 	int col2;
 	long color = 0;
+	boolean isDead;
 	int n;
 	int d;
 	private final static String TAG = "GameStatus";
@@ -75,25 +59,70 @@ public class GameStatus extends Activity{
 
 		@Override
 	    protected void onPostExecute(String result) {
-	    	clicked = false;
-	    	Log.v(TAG, "Post executed");
-	    	Log.v(TAG, "RESULT VAL:" + result);
-	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
-	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    	intent.putExtra("playerList", result);
-	    	intent.putExtra(c.isWerewolf(), isWerewolf);
-	    	intent.putExtra(c.createTime(), created);
-	    	intent.putExtra(c.nightFreq(), freq);
-	    	intent.putExtra("username", username);
-	    	intent.putExtra("password", password);
-	    	startActivity(intent);
+//	    	clicked = false;
+//	    	Log.v(TAG, "Post executed");
+//	    	Log.v(TAG, "RESULT VAL:" + result);
+//	    	Intent intent = new Intent(getApplicationContext(), PlayerList.class);
+//	    	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//	    	intent.putExtra("playerList", result);
+//	    	intent.putExtra(c.isWerewolf(), isWerewolf);
+//	    	intent.putExtra(c.createTime(), created);
+//	    	intent.putExtra(c.nightFreq(), freq);
+//	    	intent.putExtra("username", username);
+//	    	intent.putExtra("password", password);
+//	    	startActivity(intent);
+	    	if(clicked){
+	    		clicked = false;
+	    	
+	    		Log.v(TAG, "Post executed");
+	    		Log.v(TAG, "RESULT VAL:" + result);
+				Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
+	    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    		i.putExtra("playerinfo", result);
+	    		i.putExtra(c.isWerewolf(), isWerewolf);
+	    		i.putExtra(c.isDead(), isDead);
+	    		i.putExtra(c.createTime(), created);
+	    		i.putExtra(c.nightFreq(), freq);
+	    		i.putExtra("username", username);
+	    		i.putExtra("password", password);
+//	    		intent.putExtra("isWerewolf", isWerewolf);
+	    		startActivity(i);
+	    	}
+	    	else{
+	    		try {
+					JSONObject resp = new JSONObject(result);
+//					isDead = resp.getBoolean(c.isDead());
+					isWerewolf = resp.getBoolean(c.isWerewolf());
+					JSONArray respAr = resp.getJSONArray("players");
+					updateListInfo(resp.toString());
+					if(isDead){
+						v.vibrate(200);
+						Thread.currentThread().sleep(200);
+						v.vibrate(200);
+//						Toast.makeText(context, text, duration)
+					}else{
+						
+					}
+					if(!respAr.equals(responseArray)){
+						updateListInfo(resp.toString());
+					}
+					if(wolves != response.getInt("numWolf") || peeps != response.getInt("numPeep")){
+						wolves = response.getInt("numWolf");
+						peeps = response.getInt("numPeep");
+					}
+					
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    	}
 	    }
 	  }
 	
-	private Button startButton;
-	private Button pauseButton;
-	private Button refreshButton;
-	private Button playerListButton;
 	private boolean clicked = false;
 	private Constants c = new Constants();
 	private ViewFlipper flippy;
@@ -113,12 +142,19 @@ public class GameStatus extends Activity{
 	private ArrayList<String> scentList;
 	private ArrayList<String> killList;
 	private ListView list;
-
+	private Vibrator v;
+	private ProgressBar wolfProgress;
+	private int wolves;
+	private int peeps;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_gamestatus);
 		
+		// Get instance of Vibrator from current Context
+		v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+		// Vibrate for 400 milliseconds
 		
 		flippy = (ViewFlipper) findViewById(R.id.flippy);
 		n = getResources().getColor(R.color.night);
@@ -137,9 +173,6 @@ public class GameStatus extends Activity{
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
-		ProgressBar progressBar = (ProgressBar) findViewById(R.id.balance_bar);
-		progressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
-		progressBar.setProgress(50);
 		if(isNight){
 			col = R.color.night;
 			col2 = R.color.day;
@@ -151,31 +184,7 @@ public class GameStatus extends Activity{
 		freq = getIntent().getExtras().getLong(c.nightFreq());
 		timerValue = (TextView) findViewById(R.id.timerValue);
 		System.out.println("FREQUENCY" + freq);
-		playerListButton = (Button) findViewById(R.id.playerlist);
-		playerListButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View view) {
-				if(!clicked){
-					clicked = true;
-					DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, null, false);
-					if(!isWerewolf || !isNight){				    
-						task.execute(new String[] {c.aliveURL() });
-					}
-					else{
-						task.execute(new String[] { c.scentURL()});
-					}
-				}
-			}
-			});
 		
-		refreshButton = (Button) findViewById(R.id.refresh);
-		refreshButton.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View view) {
-				startTime = SystemClock.uptimeMillis();
-				customHandler.postDelayed(updateTimerThread, 0);
-
-			}
-		});
 		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver")){
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
@@ -186,85 +195,53 @@ public class GameStatus extends Activity{
 		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
 		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
 		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-		startService(serviceIntent);
+//		startService(serviceIntent);
 		customHandler.postDelayed(updateTimerThread, 0);
+		customHandler.postDelayed(updateGameStatus, 30000);
 		
-		
-//		username = getIntent().getExtras().getString("username");
-//		password = getIntent().getExtras().getString("password");
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
 		killList = new ArrayList<String>();
-		String[] stringarray = null;
+		updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
+		wolfProgress = (ProgressBar) findViewById(R.id.balance_bar);
 		try {
 			response = new JSONObject(getIntent().getExtras().getString((c.allPlayers())));
-			JSONArray array = response.getJSONArray("players");
-			Log.w(TAG, response.toString());
-			JSONObject obj;
-			boolean isDead;
-			int score = 0;			
-			stringarray = new String[array.length() - 1];
-			List<String> stringList = new ArrayList<String>();
-	        for (int i = 0; i < array.length(); i++) {
-	            obj = (JSONObject) array.get(i);
-	            isDead = obj.getBoolean(c.isDead());
-	            if(isWerewolf){
-	            	score = obj.getInt("score");
-	            }
-	            
-	            if(!obj.getString("id").equals(username)){
-	            	System.out.println(obj.getString("id") + " username: " +  username);
-	            	stringList.add(obj.getString("id"));
-	            	if(isWerewolf && score > 0){
-	            		scentList.add(obj.getString("id"));
-	            		killList.add(obj.getString("id"));
-	            	}
-	            	
-	            }
-	        	
-	        }
-	        for( int i = 0; i < stringList.size(); i++){
-	        	stringarray[i] = stringList.get(i);
-	        }
+			
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+//		progressBar.getIndeterminateDrawable().setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
+		wolves = 0;
+		try {
+			wolves = response.getInt("numWolf");
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		peeps = 0;
+		try {
+			peeps = response.getInt("numPeep");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray){
-        	@Override
-        	public View getView(int position, View convertView, ViewGroup parent) {
-	            TextView textView = (TextView) super.getView(position, convertView, parent);
-	            if(scentList.contains(textView.getText().toString())){
-	            	textView.setTextColor(getResources().getColor(R.color.cyan));
-	            }
-	            if(killList.contains(textView.getText().toString())){;
-	            	textView.setTextColor(getResources().getColor(R.color.red));
-	            }
-	            return textView;
-        	}
-        }; 
-		
-		list.setAdapter(adapter);
-        list.setOnItemClickListener(new OnItemClickListener() {
-        	@Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                int position, long id) {
-        		String player = ((TextView) view).getText().toString();
-                // selected item
-        		if(!clicked){
-        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-        			pairs.add(new BasicNameValuePair("playername", player));
-        			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, pairs, false);
-        			task.execute(new String[] { c.getInfoURL() +"/" + player });
-        			clicked = true;
-        		}
-               
-            }
-
-          });
+		int total = wolves + peeps;
+		int percent = peeps * 100 / total;
+		if(percent < 50){
+			wolfProgress.setBackgroundColor(Color.RED);
+		}
+		wolfProgress.setProgress(percent);
 	}
+	private Runnable updateGameStatus = new Runnable(){
 
+		@Override
+		public void run() {
+			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, null, false);
+			task.execute(new String[] {c.statusURL()});
+		}
+		
+	};
 	private Runnable updateTimerThread = new Runnable() {
 
 		public void run() {
@@ -357,6 +334,9 @@ public class GameStatus extends Activity{
 			int mins = secs / 60;
 			secs = secs % 60;
 			int milliseconds = (int) (updatedTime % 1000);
+			if(secs == 0 && mins == 0){
+				v.vibrate(400);
+			}
 			timerValue.setText("" + mins + ":"
 					+ String.format("%02d", secs)); // + ":"
 //					+ String.format("%03d", milliseconds));
@@ -396,5 +376,103 @@ public class GameStatus extends Activity{
         return false;
     }
    
+	public void updateListInfo(String vals){
+		String[] stringarray = null;
+		ArrayList<String>tempListS = scentList;
+		ArrayList<String>tempListK = killList;
+		scentList = new ArrayList<String>();
+		killList = new ArrayList<String>();
+		boolean changed = false;
+		boolean killChange = false;
+		try {
+			JSONObject response = new JSONObject(vals);
+			JSONArray array = response.getJSONArray("players");
+			responseArray = array;
+			Log.w(TAG, response.toString());
+			JSONObject obj;
+			boolean isDead;
+			int score = 0;			
+			stringarray = new String[array.length() - 1];
+			List<String> stringList = new ArrayList<String>();
+	        for (int i = 0; i < array.length(); i++) {
+	            obj = (JSONObject) array.get(i);
+	            isDead = obj.getBoolean(c.isDead());
+	            if(isWerewolf){
+	            	score = obj.getInt("score");
+	            }
+	            if(obj.getString("id").equals(username)){
+	            	this.isDead = obj.getBoolean(c.isDead());
+	            }
+	            
+	            if(!obj.getString("id").equals(username)){
+	            	System.out.println(obj.getString("id") + " username: " +  username);
+	            	stringList.add(obj.getString("id"));
+	            	if(isWerewolf && score > 0){
+	            		if(score == 1){
+	            			if(!tempListS.contains(obj.getString("id"))){
+	            				changed = true;
+	            			}
+	            			scentList.add(obj.getString("id"));
+	            		}else if(score == 2){
+	            			if(!tempListK.contains(obj.getString("id"))){
+	            				killChange = true;
+	            			}
+	            			killList.add(obj.getString("id"));
+	            		}
+	            	}
+	            	
+	            }
+	        	
+	        }
+	        for( int i = 0; i < stringList.size(); i++){
+	        	stringarray[i] = stringList.get(i);
+	        }
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray){
+        	@Override
+        	public View getView(int position, View convertView, ViewGroup parent) {
+	            TextView textView = (TextView) super.getView(position, convertView, parent);
+	            textView.setTextColor(Color.WHITE);
+	            if(scentList.contains(textView.getText().toString())){
+	            	textView.setTextColor(Color.YELLOW);
+	            }
+	            if(killList.contains(textView.getText().toString())){;
+	            	textView.setTextColor(Color.RED);
+	            }
+	            return textView;
+        	}
+        }; 
+		
+		list.setAdapter(adapter);
+        list.setOnItemClickListener(new OnItemClickListener() {
+        	@Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                int position, long id) {
+        		String player = ((TextView) view).getText().toString();
+                // selected item
+        		if(!clicked){
+        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        			pairs.add(new BasicNameValuePair("playername", player));
+        			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, pairs, false);
+        			task.execute(new String[] { c.getInfoURL() +"/" + player });
+        			clicked = true;
+        		}
+               
+            }
 
+          });
+        list.invalidate();
+        if(changed || killChange){
+        	if(killChange){
+        		v.vibrate(1000);
+        	}else{
+        		v.vibrate(100);
+        		v.vibrate(100);
+        	}
+        }
+	}
 }
