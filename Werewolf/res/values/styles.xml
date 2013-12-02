@@ -15,9 +15,18 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
+	<style name="tallerBarStyle" parent="@android:style/Widget.SeekBar">
+    <item name="android:indeterminateOnly">false</item>
+    <item name="android:progressDrawable">@android:drawable/progress_horizontal</item>
+    <item name="android:indeterminateDrawable">@android:drawable/progress_horizontal</item>
+    <item name="android:minHeight">8dip</item>
+    <item name="android:maxHeight">180dip</item>
+    <item name="android:maxWidth">290dip</item>
+	</style>
     <color name="red">#8b0000</color>
     <color name="cyan">#008b8b</color>
     <color name="night">#001933</color>
     <color name="day">#66B2FF</color>
-
+    <color name="white">#FFFFFF</color>
+	
 </resources>

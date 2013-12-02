@@ -26,9 +26,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -91,10 +93,18 @@ public class GameStatus extends Activity{
 	    	else{
 	    		try {
 					JSONObject resp = new JSONObject(result);
+					response = resp;
 //					isDead = resp.getBoolean(c.isDead());
 					isWerewolf = resp.getBoolean(c.isWerewolf());
 					JSONArray respAr = resp.getJSONArray("players");
 					updateListInfo(resp.toString());
+			        String img = "M";
+			        try {
+						img= response.getString("imgString");
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					if(isDead){
 						v.vibrate(200);
 						Thread.currentThread().sleep(200);
@@ -110,7 +120,7 @@ public class GameStatus extends Activity{
 						wolves = response.getInt("numWolf");
 						peeps = response.getInt("numPeep");
 					}
-					
+					changeProfileImage(img);
 					
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -146,9 +156,11 @@ public class GameStatus extends Activity{
 	private ProgressBar wolfProgress;
 	private int wolves;
 	private int peeps;
+	private ImageView image;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_gamestatus);
 		
 		// Get instance of Vibrator from current Context
@@ -157,6 +169,7 @@ public class GameStatus extends Activity{
 		// Vibrate for 400 milliseconds
 		
 		flippy = (ViewFlipper) findViewById(R.id.flippy);
+		flippy.showNext();
 		n = getResources().getColor(R.color.night);
 		d = getResources().getColor(R.color.day);
 		
@@ -164,7 +177,7 @@ public class GameStatus extends Activity{
 		cal.add(Calendar.SECOND, 10);
 		
 		Intent intent = new Intent(this, GameUpdateService.class);
-		me = findViewById(R.id.gamestatus);
+		me = findViewById(R.id.flippy);
 		username = getIntent().getExtras().getString("username");
 		Log.v(TAG, username);
 		intent.putExtra("username", username);
@@ -232,6 +245,16 @@ public class GameStatus extends Activity{
 			wolfProgress.setBackgroundColor(Color.RED);
 		}
 		wolfProgress.setProgress(percent);
+        String img = "M";
+        try {
+			img= response.getString("imgString");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        image = (ImageView) findViewById(R.id.imageView1);
+        changeProfileImage(img);
+
 	}
 	private Runnable updateGameStatus = new Runnable(){
 
@@ -355,7 +378,7 @@ public class GameStatus extends Activity{
         case MotionEvent.ACTION_UP:
             float finalX = touchevent.getX();
             if (initialX  > finalX) {
-                if (flippy.getDisplayedChild() == 1)
+                if (flippy.getDisplayedChild() == 2)
                     break;
  
                 flippy.setInAnimation(this, R.anim.in_right);
@@ -375,7 +398,15 @@ public class GameStatus extends Activity{
         }
         return false;
     }
-   
+   public void changeProfileImage(String img){
+       if(isWerewolf && isNight){
+       	image.setImageResource(R.drawable.werewolf);
+       }else if(img.equals("M")){
+       	image.setImageResource(R.drawable.male_villager);
+       }else{
+       	image.setImageResource(R.drawable.female_villager);
+       }
+   }
 	public void updateListInfo(String vals){
 		String[] stringarray = null;
 		ArrayList<String>tempListS = scentList;

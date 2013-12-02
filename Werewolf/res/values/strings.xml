@@ -18,5 +18,10 @@
     <string name="login">Login</string>
     <string name="player_status">Player Status</string>
     <string name="profile">Profile</string>
+    <string name="villagers">Humans</string>
+    <string name="wolf">Werewolves</string>
+    <string name="alive">Alive</string>
+    <string name="dead">Dead</string>
+    <string name="status">Current Status</string>
 
 </resources>
