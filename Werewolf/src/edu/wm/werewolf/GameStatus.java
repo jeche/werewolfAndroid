@@ -98,30 +98,24 @@ public class GameStatus extends Activity{
 					isWerewolf = resp.getBoolean(c.isWerewolf());
 					JSONArray respAr = resp.getJSONArray("players");
 					updateListInfo(resp.toString());
-			        String img = "M";
-			        try {
-						img= response.getString("imgString");
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					if(isDead){
 						v.vibrate(200);
 						Thread.currentThread().sleep(200);
 						v.vibrate(200);
 //						Toast.makeText(context, text, duration)
-					}else{
-						
 					}
-					if(!respAr.equals(responseArray)){
-						updateListInfo(resp.toString());
-					}
-					if(wolves != response.getInt("numWolf") || peeps != response.getInt("numPeep")){
-						wolves = response.getInt("numWolf");
-						peeps = response.getInt("numPeep");
-					}
-					changeProfileImage(img);
-					
+
+				if(wolves != response.getInt("numWolf") || peeps != response.getInt("numPeep")){
+					wolves = response.getInt("numWolf");
+					peeps = response.getInt("numPeep");
+				}
+				updateProgressBars();
+				updateListInfo(resp.toString());
+				if(isDead){
+					v.vibrate(200);
+					Thread.currentThread().sleep(200);
+					v.vibrate(200);
+				}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -157,6 +151,7 @@ public class GameStatus extends Activity{
 	private int wolves;
 	private int peeps;
 	private ImageView image;
+	private ProgressBar lifeProgress;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -179,7 +174,6 @@ public class GameStatus extends Activity{
 		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.flippy);
 		username = getIntent().getExtras().getString("username");
-		Log.v(TAG, username);
 		intent.putExtra("username", username);
 		password = getIntent().getExtras().getString("password");
 		intent.putExtra("password", password);
@@ -196,8 +190,6 @@ public class GameStatus extends Activity{
 		created = getIntent().getExtras().getLong(c.createTime());
 		freq = getIntent().getExtras().getLong(c.nightFreq());
 		timerValue = (TextView) findViewById(R.id.timerValue);
-		System.out.println("FREQUENCY" + freq);
-		
 		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver")){
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
@@ -215,8 +207,8 @@ public class GameStatus extends Activity{
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
 		killList = new ArrayList<String>();
-		updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
 		wolfProgress = (ProgressBar) findViewById(R.id.balance_bar);
+		lifeProgress = (ProgressBar) findViewById(R.id.life_bar);
 		try {
 			response = new JSONObject(getIntent().getExtras().getString((c.allPlayers())));
 			
@@ -239,21 +231,8 @@ public class GameStatus extends Activity{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int total = wolves + peeps;
-		int percent = peeps * 100 / total;
-		if(percent < 50){
-			wolfProgress.setBackgroundColor(Color.RED);
-		}
-		wolfProgress.setProgress(percent);
-        String img = "M";
-        try {
-			img= response.getString("imgString");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         image = (ImageView) findViewById(R.id.imageView1);
-        changeProfileImage(img);
+        updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
 
 	}
 	private Runnable updateGameStatus = new Runnable(){
@@ -398,15 +377,7 @@ public class GameStatus extends Activity{
         }
         return false;
     }
-   public void changeProfileImage(String img){
-       if(isWerewolf && isNight){
-       	image.setImageResource(R.drawable.werewolf);
-       }else if(img.equals("M")){
-       	image.setImageResource(R.drawable.male_villager);
-       }else{
-       	image.setImageResource(R.drawable.female_villager);
-       }
-   }
+
 	public void updateListInfo(String vals){
 		String[] stringarray = null;
 		ArrayList<String>tempListS = scentList;
@@ -431,9 +402,9 @@ public class GameStatus extends Activity{
 	            if(isWerewolf){
 	            	score = obj.getInt("score");
 	            }
-	            if(obj.getString("id").equals(username)){
-	            	this.isDead = obj.getBoolean(c.isDead());
-	            }
+//	            if(obj.getString("id").equals(username)){
+//	            	
+//	            }
 	            
 	            if(!obj.getString("id").equals(username)){
 	            	System.out.println(obj.getString("id") + " username: " +  username);
@@ -452,6 +423,16 @@ public class GameStatus extends Activity{
 	            		}
 	            	}
 	            	
+	            }else{
+	            	this.isDead = obj.getBoolean(c.isDead());
+	            	updateImg(obj);
+	            	if(isWerewolf){
+	            		updateKills(obj);
+	            	}
+	            	if(isDead){
+//	            		setDeadUI(obj);
+	            	}
+
 	            }
 	        	
 	        }
@@ -505,5 +486,39 @@ public class GameStatus extends Activity{
         		v.vibrate(100);
         	}
         }
+	}
+	private void updateKills(JSONObject obj) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void updateImg(JSONObject obj) {
+		try {
+			String img = obj.getString("imgString");
+			if(isDead){
+				image.setImageResource(R.drawable.gravestone);
+			}else if(isWerewolf && isNight){
+		    	image.setImageResource(R.drawable.werewolf);
+			}else if(img.equals("M")){
+			    image.setImageResource(R.drawable.male_villager);
+			}else{
+			    image.setImageResource(R.drawable.female_villager);
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void updateProgressBars() {
+		int total = wolves + peeps;
+		int percent = peeps * 100 / total;
+		if(percent < 50){
+			wolfProgress.setBackgroundColor(Color.RED);
+		}
+		wolfProgress.setProgress(percent);
+		
 	}
 }
