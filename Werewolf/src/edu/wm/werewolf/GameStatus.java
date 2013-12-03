@@ -45,9 +45,13 @@ public class GameStatus extends Activity{
 	boolean isNight;
 	String username;
 	String password;
+	TextView currStats;
+	List<String>changedD;
 	int col;
 	int col2;
 	long color = 0;
+	int deadCount = 0;
+	int aliveCount = 0;
 	boolean isDead;
 	int n;
 	int d;
@@ -75,7 +79,6 @@ public class GameStatus extends Activity{
 //	    	startActivity(intent);
 	    	if(clicked){
 	    		clicked = false;
-	    	
 	    		Log.v(TAG, "Post executed");
 	    		Log.v(TAG, "RESULT VAL:" + result);
 				Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
@@ -131,11 +134,9 @@ public class GameStatus extends Activity{
 	private Constants c = new Constants();
 	private ViewFlipper flippy;
 	private TextView timerValue;
-
+	private TextView playerStatus;
 	private long startTime = 0L;
-
 	private Handler customHandler = new Handler();
-
 	long timeInMilliseconds = 0L;
 	long timeSwapBuff = 0L;
 	long updatedTime = 0L;
@@ -144,6 +145,7 @@ public class GameStatus extends Activity{
 	long freq = 0L;
 	View me;
 	private ArrayList<String> scentList;
+	private ArrayList<String> deadList;
 	private ArrayList<String> killList;
 	private ListView list;
 	private Vibrator v;
@@ -157,7 +159,7 @@ public class GameStatus extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_gamestatus);
-		
+		currStats = (TextView) findViewById(R.id.textView5);
 		// Get instance of Vibrator from current Context
 		v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -177,6 +179,8 @@ public class GameStatus extends Activity{
 		intent.putExtra("username", username);
 		password = getIntent().getExtras().getString("password");
 		intent.putExtra("password", password);
+		playerStatus = (TextView) findViewById(R.id.player_status);
+		playerStatus.setTextColor(Color.WHITE);
 		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
@@ -207,6 +211,7 @@ public class GameStatus extends Activity{
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
 		killList = new ArrayList<String>();
+		deadList = new ArrayList<String>();
 		wolfProgress = (ProgressBar) findViewById(R.id.balance_bar);
 		lifeProgress = (ProgressBar) findViewById(R.id.life_bar);
 		try {
@@ -262,7 +267,7 @@ public class GameStatus extends Activity{
 			
 			newCol = (newCol * 100) / freq;
 			if(newCol < 15 && newCol > 0 && newCol != color){
-				Log.v("color", newCol + " Color fade" + color);
+//				Log.v("color", newCol + " Color fade" + color);
 				int red = Color.red(col);
 				int red2 = Color.red(col2);
 				int blue = Color.blue(col);
@@ -382,9 +387,13 @@ public class GameStatus extends Activity{
 		String[] stringarray = null;
 		ArrayList<String>tempListS = scentList;
 		ArrayList<String>tempListK = killList;
+		ArrayList<String>tempListD = deadList;
+		changedD = new ArrayList<String>();
+		deadList =  new ArrayList<String>();
 		scentList = new ArrayList<String>();
 		killList = new ArrayList<String>();
 		boolean changed = false;
+		boolean dchange = false;
 		boolean killChange = false;
 		try {
 			JSONObject response = new JSONObject(vals);
@@ -393,19 +402,27 @@ public class GameStatus extends Activity{
 			Log.w(TAG, response.toString());
 			JSONObject obj;
 			boolean isDead;
-			int score = 0;			
+			int score = 0;	
+			deadCount = 0;
+			aliveCount = 0;
 			stringarray = new String[array.length() - 1];
 			List<String> stringList = new ArrayList<String>();
 	        for (int i = 0; i < array.length(); i++) {
 	            obj = (JSONObject) array.get(i);
 	            isDead = obj.getBoolean(c.isDead());
+	            if(isDead){
+	            	if(tempListD.contains(obj.getString("id"))){
+	            		dchange = true;
+	            		changedD.add(obj.getString("id"));
+	            	}
+	            	deadList.add(obj.getString("id"));
+	            	deadCount++;
+	            }else{
+	            	aliveCount++;
+	            }
 	            if(isWerewolf){
 	            	score = obj.getInt("score");
 	            }
-//	            if(obj.getString("id").equals(username)){
-//	            	
-//	            }
-	            
 	            if(!obj.getString("id").equals(username)){
 	            	System.out.println(obj.getString("id") + " username: " +  username);
 	            	stringList.add(obj.getString("id"));
@@ -486,6 +503,19 @@ public class GameStatus extends Activity{
         		v.vibrate(100);
         	}
         }
+        if(changedD.size() > 0){
+        	String newTest = "Most recent to die: ";
+        	for(int i = 0; i < changedD.size(); i ++){
+        		newTest = newTest + changedD.get(i);
+        		if(i != changedD.size() - 1){
+        			newTest = newTest + ", ";
+        		}
+        	}
+        	currStats.setText(newTest);
+        }else{
+        	currStats.setText("No one has died recently.");
+        }
+        updateProgressBars();
 	}
 	private void updateKills(JSONObject obj) {
 		// TODO Auto-generated method stub
@@ -497,28 +527,40 @@ public class GameStatus extends Activity{
 			String img = obj.getString("imgString");
 			if(isDead){
 				image.setImageResource(R.drawable.gravestone);
+				playerStatus.setText("Dead");
 			}else if(isWerewolf && isNight){
 		    	image.setImageResource(R.drawable.werewolf);
+		    	playerStatus.setText("Alive and hungry");
 			}else if(img.equals("M")){
 			    image.setImageResource(R.drawable.male_villager);
+			    playerStatus.setText("Alive");
 			}else{
 			    image.setImageResource(R.drawable.female_villager);
+			    playerStatus.setText("Alive");
 			}
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		updateProgressBars();
 	}
 	
 	private void updateProgressBars() {
+		int ptotal = aliveCount + deadCount;
+		int apercent = aliveCount * 100 / ptotal;
 		int total = wolves + peeps;
 		int percent = peeps * 100 / total;
 		if(percent < 50){
 			wolfProgress.setBackgroundColor(Color.RED);
 		}
 		wolfProgress.setProgress(percent);
+		if(apercent < 33){
+			lifeProgress.setBackgroundColor(Color.RED);
+		}else if(apercent < 66){
+			lifeProgress.setBackgroundColor(Color.MAGENTA);
+		}
+		lifeProgress.setProgress(apercent);
 		
 	}
 }

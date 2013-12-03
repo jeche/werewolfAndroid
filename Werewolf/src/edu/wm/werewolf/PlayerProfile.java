@@ -127,13 +127,22 @@ public class PlayerProfile extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        if(img.equals("M")){
-        	image.setImageResource(R.drawable.male_villager);
-        }else if(isWerewolf){
-        	image.setImageResource(R.drawable.werewolf);
-        }else{
-        	image.setImageResource(R.drawable.female_villager);
-        }
+        try {
+			if(response.getBoolean("dead")){
+				image.setImageResource(R.drawable.gravestone);
+				
+			}
+			else if(img.equals("M")){
+				image.setImageResource(R.drawable.male_villager);
+			}else if(isWerewolf && response.getBoolean("werewolf")){
+				image.setImageResource(R.drawable.werewolf);
+			}else{
+				image.setImageResource(R.drawable.female_villager);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         
          

@@ -90,9 +90,8 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f060002;
         public static final int activity_gamestatus=0x7f060017;
-        public static final int activity_main=0x7f060019;
-        public static final int activity_playerlist=0x7f060018;
-        public static final int activity_playerprofile=0x7f06001a;
+        public static final int activity_main=0x7f060018;
+        public static final int activity_playerprofile=0x7f060019;
         public static final int alive=0x7f060014;
         public static final int app_name=0x7f060001;
         public static final int dead=0x7f060015;
