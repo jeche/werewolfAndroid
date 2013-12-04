@@ -2,6 +2,7 @@ package edu.wm.werewolf;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
@@ -9,6 +10,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
@@ -47,12 +56,14 @@ public class GameStatus extends Activity{
 	String password;
 	TextView currStats;
 	List<String>changedD;
+	private GoogleMap kmap;
 	int col;
 	int col2;
 	long color = 0;
 	int deadCount = 0;
 	int aliveCount = 0;
 	boolean isDead;
+	boolean keepUpdating = true;
 	int n;
 	int d;
 	private final static String TAG = "GameStatus";
@@ -81,10 +92,31 @@ public class GameStatus extends Activity{
 	    		clicked = false;
 	    		Log.v(TAG, "Post executed");
 	    		Log.v(TAG, "RESULT VAL:" + result);
+	    		JSONObject re = null;
+				try {
+					re = new JSONObject(result);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
 	    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	    		i.putExtra("playerinfo", result);
 	    		i.putExtra(c.isWerewolf(), isWerewolf);
+	    		long she = (new Date().getTime() - created) / freq % 2;
+	    		i.putExtra("vote", (she == 0));
+	    		try {
+					i.putExtra("kill", (she == 1 && isWerewolf &&killList.contains(re.getString("id"))));
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+	    		try {
+					i.putExtra("smell", (she == 1 && isWerewolf &&scentList.contains(re.getString("id"))));
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	    		i.putExtra(c.isDead(), isDead);
 	    		i.putExtra(c.createTime(), created);
 	    		i.putExtra(c.nightFreq(), freq);
@@ -94,6 +126,7 @@ public class GameStatus extends Activity{
 	    		startActivity(i);
 	    	}
 	    	else{
+	    		if(keepUpdating){
 	    		try {
 					JSONObject resp = new JSONObject(result);
 					response = resp;
@@ -111,6 +144,7 @@ public class GameStatus extends Activity{
 				if(wolves != response.getInt("numWolf") || peeps != response.getInt("numPeep")){
 					wolves = response.getInt("numWolf");
 					peeps = response.getInt("numPeep");
+					updateMap(response);
 				}
 				updateProgressBars();
 				updateListInfo(resp.toString());
@@ -119,6 +153,7 @@ public class GameStatus extends Activity{
 					Thread.currentThread().sleep(200);
 					v.vibrate(200);
 				}
+				
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -126,8 +161,10 @@ public class GameStatus extends Activity{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+	    		customHandler.postDelayed(updateGameStatus, 15000);
 	    	}
 	    }
+		}
 	  }
 	
 	private boolean clicked = false;
@@ -154,6 +191,7 @@ public class GameStatus extends Activity{
 	private int peeps;
 	private ImageView image;
 	private ProgressBar lifeProgress;
+	AlarmManager alarm;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -172,7 +210,9 @@ public class GameStatus extends Activity{
 		
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
-		
+		kmap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+
+
 		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.flippy);
 		username = getIntent().getExtras().getString("username");
@@ -198,7 +238,7 @@ public class GameStatus extends Activity{
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
 		}
-		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
                     60*1000, pintent);
 		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
@@ -206,7 +246,7 @@ public class GameStatus extends Activity{
 		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
 //		startService(serviceIntent);
 		customHandler.postDelayed(updateTimerThread, 0);
-		customHandler.postDelayed(updateGameStatus, 30000);
+		customHandler.postDelayed(updateGameStatus, 15000);
 		
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
@@ -237,8 +277,9 @@ public class GameStatus extends Activity{
 			e.printStackTrace();
 		}
         image = (ImageView) findViewById(R.id.imageView1);
+//        response = JSONObject(getIntent().getExtras().getString((c.allPlayers())));
         updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
-
+        updateMap(response);
 	}
 	private Runnable updateGameStatus = new Runnable(){
 
@@ -255,7 +296,7 @@ public class GameStatus extends Activity{
 //			long color;
 			long newCol;
 			int change;
-			timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
+			timeInMilliseconds = new Date().getTime() - startTime;
 			newCol = timeInMilliseconds;
 			long color2;
 			color2 = newCol;
@@ -265,78 +306,82 @@ public class GameStatus extends Activity{
 			newCol = newCol % freq;
 			newCol = freq - newCol;
 			
-			newCol = (newCol * 100) / freq;
-			if(newCol < 15 && newCol > 0 && newCol != color){
-//				Log.v("color", newCol + " Color fade" + color);
-				int red = Color.red(col);
-				int red2 = Color.red(col2);
-				int blue = Color.blue(col);
-				int blue2 = Color.blue(col2);
-				int green = Color.green(col);
-				int green2 = Color.green(col2);
-				color = newCol;
-				int newRed;
-				int newGreen;
-				int newBlue;
-				newCol = 15 - newCol;
-				if(col == d){
-					 newRed = (int) (red - 51 * newCol / 15);
-					if(newRed < 0){
-						newRed = 0;
-					}
-					newGreen = (int) (green - 25 * newCol / 15);
-					if(newGreen < 25){
-						newGreen = 25;
-					}
-					if(newGreen <= 102){
-						newBlue = (int) (blue - 51 * newCol / 15);
-						if(newBlue < 51){
-							newBlue = 51;
-						}
-					}else{
-						newBlue = 255;
-					}
-				}else{
-					newGreen = (int) (green + 25 * newCol / 15);
-					if(newGreen > 178){
-						newGreen = 178;
-					}
-					newBlue = (int) (blue + 51 * newCol / 15);
-					if(newBlue > 255 || newGreen >= 128){
-						newBlue = 255;
-					}
-					if(newGreen >= 153){
-						newRed = (int) (red + 51 * newCol / 15);
-						if(newRed > 102){
-							newRed = 102;
-						}
-					}else{
-						newRed = 0;
-					}
-				}
-				int goTo;
-				float[] hsv = new float[3];
-				Color.RGBToHSV(red, green, blue, hsv );
+//			newCol = (newCol * 100) / freq;
+//			if(newCol < 15 && newCol > 0 && newCol != color){
+////				Log.v("color", newCol + " Color fade" + color);
+//				int red = Color.red(col);
+//				int red2 = Color.red(col2);
+//				int blue = Color.blue(col);
+//				int blue2 = Color.blue(col2);
+//				int green = Color.green(col);
+//				int green2 = Color.green(col2);
+//				color = newCol;
+//				int newRed;
+//				int newGreen;
+//				int newBlue;
 //				newCol = 15 - newCol;
-				goTo = Color.rgb(newRed, newGreen, newBlue);
-//				col = goTo;
-//				goTo = Color.rgb((int) (red + color * (red - red2) / 15), green + (int)color *(green -green2)/15, blue + (int)color *(blue - blue2)/15);
-				
-//				Color.red();
-//				col = col + change / 100;
-				me.setBackgroundColor(goTo);
-			} else if((color2 / freq) % 2 == 0 && col != n){
-				me.setBackgroundColor(n);
-				Log.v("color", color2 + " night");
-				col = n;
-				col2 = d;
-			} else if(col != d && (color2 / freq) % 2 == 1){
-				me.setBackgroundColor(d);
-				Log.v("color", color2 + " day");
-				col = d;
-				col2 = n;
-			}
-			
+//				if(col == d){
+//					 newRed = (int) (red - 51 * newCol / 15);
+//					if(newRed < 0){
+//						newRed = 0;
+//					}
+//					newGreen = (int) (green - 25 * newCol / 15);
+//					if(newGreen < 25){
+//						newGreen = 25;
+//					}
+//					if(newGreen <= 102){
+//						newBlue = (int) (blue - 51 * newCol / 15);
+//						if(newBlue < 51){
+//							newBlue = 51;
+//						}
+//					}else{
+//						newBlue = 255;
+//					}
+//				}else{
+//					newGreen = (int) (green + 25 * newCol / 15);
+//					if(newGreen > 178){
+//						newGreen = 178;
+//					}
+//					newBlue = (int) (blue + 51 * newCol / 15);
+//					if(newBlue > 255 || newGreen >= 128){
+//						newBlue = 255;
+//					}
+//					if(newGreen >= 153){
+//						newRed = (int) (red + 51 * newCol / 15);
+//						if(newRed > 102){
+//							newRed = 102;
+//						}
+//					}else{
+//						newRed = 0;
+//					}
+//				}
+//				int goTo;
+////				newCol = 15 - newCol;
+//				goTo = Color.rgb(newRed, newGreen, newBlue);
+////				col = goTo;
+////				goTo = Color.rgb((int) (red + color * (red - red2) / 15), green + (int)color *(green -green2)/15, blue + (int)color *(blue - blue2)/15);
+//				
+////				Color.red();
+////				col = col + change / 100;
+//				me.setBackgroundColor(goTo);
+//			} else if((color2 / freq) % 2 == 0 && col != n){
+//				me.setBackgroundColor(n);
+//				Log.v("color", color2 + " night");
+//				col = n;
+//				col2 = d;
+//			} else if(col != d && (color2 / freq) % 2 == 1){
+//				me.setBackgroundColor(d);
+//				Log.v("color", color2 + " day");
+//				col = d;
+//				col2 = n;
+//			}
+			timeInMilliseconds = new Date().getTime() - startTime;
+			newCol = timeInMilliseconds;
+//			long color2;
+			color2 = newCol;
+			timeInMilliseconds = timeInMilliseconds % freq;
+			timeInMilliseconds = freq - timeInMilliseconds;
+			updatedTime = timeSwapBuff + timeInMilliseconds;
 			int secs = (int) (updatedTime / 1000);
 			int mins = secs / 60;
 			secs = secs % 60;
@@ -347,7 +392,12 @@ public class GameStatus extends Activity{
 			timerValue.setText("" + mins + ":"
 					+ String.format("%02d", secs)); // + ":"
 //					+ String.format("%03d", milliseconds));
-			customHandler.postDelayed(this, 0);
+			if(mins == 0 && secs == 0){
+				updateListInfo(response.toString());
+			}
+			if(keepUpdating){
+				customHandler.postDelayed(this, 0);
+			}
 		}
 		};
 	private float initialX = 0f;
@@ -562,5 +612,44 @@ public class GameStatus extends Activity{
 		}
 		lifeProgress.setProgress(apercent);
 		
+	}
+	
+	@Override
+	protected
+	void onDestroy(){
+		super.onDestroy();
+//		alarm.cancel();
+		
+	}
+	
+	public void updateMap(JSONObject respo){
+		JSONArray kAr;
+		try {
+			kAr = respo.getJSONArray("kills");
+	
+		for(int i = 0; i < kAr.length(); i++){
+//				kAr.get(i).getLong("lat");
+//				kAr.get(i).getString("victim");
+//				;
+				
+				
+					kmap.addMarker(new MarkerOptions().position(new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).title(((JSONObject)kAr.get(i)).getString("victimID")));
+					CameraPosition cameraPosition = new CameraPosition.Builder().target(
+			                new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).zoom(12).build();
+			 
+			kmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+				
+		}
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	@Override
+	public
+	void onBackPressed(){
+		super.onBackPressed();
+		keepUpdating = false;
 	}
 }

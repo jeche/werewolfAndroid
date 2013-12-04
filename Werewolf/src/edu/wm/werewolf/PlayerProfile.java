@@ -11,6 +11,7 @@ import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PlayerProfile extends Activity {
     JSONObject response;
@@ -30,10 +32,11 @@ public class PlayerProfile extends Activity {
     Constants c = new Constants();
     OnClickListener l;
     boolean clicked = false;
+    private static final String TAG = "PlayerProfile";
     
     
     
-    
+    Activity to;
 	private class DownloadWebPageTask extends WebPageTask {
 
 	    public DownloadWebPageTask(boolean hasPairs, String username,
@@ -44,31 +47,58 @@ public class PlayerProfile extends Activity {
 		@Override
 	    protected void onPostExecute(String result) {
 	    	clicked = false;
-	    	Log.v(null, "Post executed");
-	    	Log.v(null, "RESULT VAL:" + result);
-			Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
-	    	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    	i.putExtra("playerinfo", result);
-	    	i.putExtra("username", username);
-	    	i.putExtra("password", password);
-//	    	intent.putExtra("isWerewolf", isWerewolf);
-	    	startActivity(i);
+	    	Log.e(TAG, "Post executed");
+	    	Log.e(TAG, "RESULT VAL:" + result);
+
+	    	try {
+				JSONObject resp = new JSONObject(result);
+				if(resp.getString("status").contains("success")){
+				  	Context context3 = getApplicationContext();
+					CharSequence text3 = "Success";
+					int duration3 = Toast.LENGTH_SHORT;
+					Toast toast3 = Toast.makeText(context3, text3, duration3);
+					toast3.show();
+				}else{
+				  	Context context3 = getApplicationContext();
+					CharSequence text3 = "Failed";
+					int duration3 = Toast.LENGTH_SHORT;
+					Toast toast3 = Toast.makeText(context3, text3, duration3);
+					toast3.show();
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	
+//	    	Toast.makeText(context, text, duration)
+	    	to.onBackPressed();
+//			Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
+//	    	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//	    	i.putExtra("playerinfo", result);
+//	    	i.putExtra("username", username);
+//	    	i.putExtra("password", password);
+////	    	intent.putExtra("isWerewolf", isWerewolf);
+//	    	startActivity(i);
 	    }
 	  }
     boolean isWerewolf = false;
     
     View me;
-    private long created;
-    private long freq;
-	private boolean isNight;
+//    private long created;
+//    private long freq;
+//	private boolean isNight;
 	private boolean isDead;
-	private long timeInMilliseconds;
+//	private long timeInMilliseconds;
+	boolean canKill;
+	boolean canVote;
+	boolean canSmell;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.setContentView(R.layout.activity_playerprofile);
         me = findViewById(R.id.playerprofile);
+        to = this;
         me.setBackgroundColor(Color.BLACK);
         TextView playerName = (TextView) findViewById(R.id.playername);
 //        TextView 
@@ -78,10 +108,13 @@ public class PlayerProfile extends Activity {
         Intent i = getIntent();
         isWerewolf = i.getBooleanExtra(c.isWerewolf(), false);
         isDead = i.getBooleanExtra(c.isDead(), true);
-        freq = i.getLongExtra(c.nightFreq(), 0);
-        created = i.getLongExtra(c.createTime(), 0);
-        timeInMilliseconds = (SystemClock.uptimeMillis() - created) / freq %2;
-        isNight = (timeInMilliseconds == 0);
+        canVote = i.getBooleanExtra("vote", false);
+        canSmell = i.getBooleanExtra("smell", false);
+        canKill = i.getBooleanExtra("kill", false);
+//        freq = i.getLongExtra(c.nightFreq(), 0);
+//        created = i.getLongExtra(c.createTime(), 0);
+        
+        // isNight = (timeInMilliseconds == 0);
         username = i.getStringExtra("username");
         password = i.getStringExtra("password");
         // getting attached intent data
@@ -101,11 +134,11 @@ public class PlayerProfile extends Activity {
 			} else{
 				playerStatus.setText("Alive");
 			}
-	        if(isWerewolf&&isNight&&!response.getString("id").equals(username)){
+	        if(isWerewolf&&canKill){
 	        	playerButton.setText("Kill");
 	        	l = new KillListener(username, password, response.getString("id"), true);
 	        	playerButton.setOnClickListener(l);
-	        } else if(!response.getString("id").equals(username)&&!isNight){
+	        } else if(canVote){
 	        	playerButton.setText("Vote");
 	        	l = new KillListener(username, password, response.getString("id"), false);
 	        	playerButton.setOnClickListener(l);
@@ -165,7 +198,7 @@ public class PlayerProfile extends Activity {
 		
 		@Override
 		public void onClick(View v) {
-			if(clicked){
+			if(!clicked){
 				clicked = true;
 				if(b){
 				List<NameValuePair> pairs = new ArrayList<NameValuePair>();
@@ -185,10 +218,12 @@ public class PlayerProfile extends Activity {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+	    			Log.v(TAG, "attempting Vote");
 					DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
 					task.execute(new String[] { c.getBaseUrl()+"players/vote" });	
 				}
 			}
+			Log.v(TAG, "escaped listener");
 			
 			
 		}

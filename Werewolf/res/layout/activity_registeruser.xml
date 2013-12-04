@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    
 
     <Button
         android:id="@+id/profile_button"
@@ -49,7 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/player_status"
         android:layout_alignLeft="@+id/player_status"
-        android:ems="10" />
+        android:ems="10"
+        android:inputType="textVisiblePassword" />
 
     <TextView
         android:id="@+id/textView2"
