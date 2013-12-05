@@ -110,11 +110,11 @@ public class GameUpdateService extends Service implements LocationListener{
 	   
        lat = loc.getLatitude();
        lng = loc.getLongitude();
-       List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-       pairs.add(new BasicNameValuePair("lng", lng+""));
-       pairs.add(new BasicNameValuePair("lat", lat+""));
-       DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
-       task.execute(new String[] { c.updateLocation() });
+//       List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+//       pairs.add(new BasicNameValuePair("lng", lng+""));
+//       pairs.add(new BasicNameValuePair("lat", lat+""));
+//       DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
+//       task.execute(new String[] { c.updateLocation() });
 
 //       String Text = "My current location is: " +
 //       "Latitud = " + loc.getLatitude() +

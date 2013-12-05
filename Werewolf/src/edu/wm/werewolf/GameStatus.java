@@ -21,12 +21,17 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -161,7 +166,7 @@ public class GameStatus extends Activity{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-	    		customHandler.postDelayed(updateGameStatus, 15000);
+	    		customHandler.postDelayed(updateGameStatus, 60000);
 	    	}
 	    }
 		}
@@ -192,6 +197,7 @@ public class GameStatus extends Activity{
 	private ImageView image;
 	private ProgressBar lifeProgress;
 	AlarmManager alarm;
+	private TransitionDrawable trans;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -221,16 +227,16 @@ public class GameStatus extends Activity{
 		intent.putExtra("password", password);
 		playerStatus = (TextView) findViewById(R.id.player_status);
 		playerStatus.setTextColor(Color.WHITE);
-		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
+//		PendingIntent pintent = PendingIntent.getService(GameUpdateService.class, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
-		if(isNight){
-			col = R.color.night;
-			col2 = R.color.day;
-		}else{
-			col = R.color.day;
-			col2 = R.color.night;
-		}
+//		if(isNight){
+		col = R.color.night;
+		col2 = R.color.day;
+//		}else{
+//			col = R.color.day;
+//			col2 = R.color.night;
+//		}
 		created = getIntent().getExtras().getLong(c.createTime());
 		freq = getIntent().getExtras().getLong(c.nightFreq());
 		timerValue = (TextView) findViewById(R.id.timerValue);
@@ -238,15 +244,15 @@ public class GameStatus extends Activity{
 			timerValue.setText("No game currently running.");
 			timerValue.setTextSize(20);
 		}
-		alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                    60*1000, pintent);
+//		alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+//                    60*10000, pintent);
 		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
 		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
 		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-//		startService(serviceIntent);
+		startService(serviceIntent);
 		customHandler.postDelayed(updateTimerThread, 0);
-		customHandler.postDelayed(updateGameStatus, 15000);
+		customHandler.postDelayed(updateGameStatus, 60000);
 		
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
@@ -280,6 +286,19 @@ public class GameStatus extends Activity{
 //        response = JSONObject(getIntent().getExtras().getString((c.allPlayers())));
         updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
         updateMap(response);
+        if(isNight){
+        	me.setBackgroundColor(col);
+        }else{
+        	me.setBackgroundColor(col2);
+        }
+		int k = Color.rgb(0,25,51);
+		int d = Color.rgb(102, 178, 255);
+        ColorDrawable[] color = {new ColorDrawable(k ), new ColorDrawable(d)};
+        trans = new TransitionDrawable(color);
+        //This will work also on old devices. The latest API says you have to use setBackground instead.
+        me.setBackground(trans);
+//        trans.startTransition((int) freq);
+        
 	}
 	private Runnable updateGameStatus = new Runnable(){
 
@@ -289,7 +308,8 @@ public class GameStatus extends Activity{
 			task.execute(new String[] {c.statusURL()});
 		}
 		
-	};
+	}; 
+	boolean go = true;
 	private Runnable updateTimerThread = new Runnable() {
 
 		public void run() {
@@ -306,78 +326,22 @@ public class GameStatus extends Activity{
 			newCol = newCol % freq;
 			newCol = freq - newCol;
 			
-//			newCol = (newCol * 100) / freq;
-//			if(newCol < 15 && newCol > 0 && newCol != color){
-////				Log.v("color", newCol + " Color fade" + color);
-//				int red = Color.red(col);
-//				int red2 = Color.red(col2);
-//				int blue = Color.blue(col);
-//				int blue2 = Color.blue(col2);
-//				int green = Color.green(col);
-//				int green2 = Color.green(col2);
-//				color = newCol;
-//				int newRed;
-//				int newGreen;
-//				int newBlue;
-//				newCol = 15 - newCol;
-//				if(col == d){
-//					 newRed = (int) (red - 51 * newCol / 15);
-//					if(newRed < 0){
-//						newRed = 0;
-//					}
-//					newGreen = (int) (green - 25 * newCol / 15);
-//					if(newGreen < 25){
-//						newGreen = 25;
-//					}
-//					if(newGreen <= 102){
-//						newBlue = (int) (blue - 51 * newCol / 15);
-//						if(newBlue < 51){
-//							newBlue = 51;
-//						}
-//					}else{
-//						newBlue = 255;
-//					}
-//				}else{
-//					newGreen = (int) (green + 25 * newCol / 15);
-//					if(newGreen > 178){
-//						newGreen = 178;
-//					}
-//					newBlue = (int) (blue + 51 * newCol / 15);
-//					if(newBlue > 255 || newGreen >= 128){
-//						newBlue = 255;
-//					}
-//					if(newGreen >= 153){
-//						newRed = (int) (red + 51 * newCol / 15);
-//						if(newRed > 102){
-//							newRed = 102;
-//						}
-//					}else{
-//						newRed = 0;
-//					}
-//				}
-//				int goTo;
-////				newCol = 15 - newCol;
-//				goTo = Color.rgb(newRed, newGreen, newBlue);
-////				col = goTo;
-////				goTo = Color.rgb((int) (red + color * (red - red2) / 15), green + (int)color *(green -green2)/15, blue + (int)color *(blue - blue2)/15);
-//				
-////				Color.red();
-////				col = col + change / 100;
-//				me.setBackgroundColor(goTo);
-//			} else if((color2 / freq) % 2 == 0 && col != n){
-//				me.setBackgroundColor(n);
-//				Log.v("color", color2 + " night");
-//				col = n;
-//				col2 = d;
-//			} else if(col != d && (color2 / freq) % 2 == 1){
-//				me.setBackgroundColor(d);
-//				Log.v("color", color2 + " day");
-//				col = d;
-//				col2 = n;
-//			}
+			newCol = (newCol * 100) / freq;
+			if(newCol < 15 && go){
+				go = false;
+				if(isNight){
+					trans.startTransition(15000);
+					Toast.makeText(getApplication(), "Transit to day", Toast.LENGTH_SHORT).show();
+				}else{
+					trans.reverseTransition(15000);
+					Toast.makeText(getApplication(), "Transit to night", Toast.LENGTH_SHORT).show();
+				}
+				
+			}else if(newCol > 15){
+				go = true;
+			}
 			timeInMilliseconds = new Date().getTime() - startTime;
 			newCol = timeInMilliseconds;
-//			long color2;
 			color2 = newCol;
 			timeInMilliseconds = timeInMilliseconds % freq;
 			timeInMilliseconds = freq - timeInMilliseconds;
@@ -387,13 +351,29 @@ public class GameStatus extends Activity{
 			secs = secs % 60;
 			int milliseconds = (int) (updatedTime % 1000);
 			if(secs == 0 && mins == 0){
-				v.vibrate(400);
+//				v.vibrate(400);
 			}
 			timerValue.setText("" + mins + ":"
 					+ String.format("%02d", secs)); // + ":"
 //					+ String.format("%03d", milliseconds));
-			if(mins == 0 && secs == 0){
-				updateListInfo(response.toString());
+			if(mins == 0 && secs == 0 ){
+				if(timeInMilliseconds / freq % 2 == 0){
+					isNight = false;
+					updateListInfo(response.toString());
+				}else{
+					isNight = true;
+					updateListInfo(response.toString());
+				}
+//				updateListInfo(response.toString());
+				
+//				int k = col2;
+//				col2 = col;
+//				col = k;
+//		        ColorDrawable[] color = {new ColorDrawable(col), new ColorDrawable(col2)};
+//		        trans = new TransitionDrawable(color);
+		        //This will work also on old devices. The latest API says you have to use setBackground instead.
+//		        me.setBackground(trans);
+//		        trans.startTransition((int) freq);
 			}
 			if(keepUpdating){
 				customHandler.postDelayed(this, 0);
@@ -449,7 +429,7 @@ public class GameStatus extends Activity{
 			JSONObject response = new JSONObject(vals);
 			JSONArray array = response.getJSONArray("players");
 			responseArray = array;
-			Log.w(TAG, response.toString());
+			Log.v(TAG, response.toString());
 			JSONObject obj;
 			boolean isDead;
 			int score = 0;	
@@ -476,7 +456,7 @@ public class GameStatus extends Activity{
 	            if(!obj.getString("id").equals(username)){
 	            	System.out.println(obj.getString("id") + " username: " +  username);
 	            	stringList.add(obj.getString("id"));
-	            	if(isWerewolf && score > 0){
+	            	if(isWerewolf && score > 0 && isNight){
 	            		if(score == 1){
 	            			if(!tempListS.contains(obj.getString("id"))){
 	            				changed = true;
@@ -567,6 +547,7 @@ public class GameStatus extends Activity{
         }
         updateProgressBars();
 	}
+	
 	private void updateKills(JSONObject obj) {
 		// TODO Auto-generated method stub
 		
@@ -580,7 +561,7 @@ public class GameStatus extends Activity{
 				playerStatus.setText("Dead");
 			}else if(isWerewolf && isNight){
 		    	image.setImageResource(R.drawable.werewolf);
-		    	playerStatus.setText("Alive and hungry");
+		    	playerStatus.setText("Hungry");
 			}else if(img.equals("M")){
 			    image.setImageResource(R.drawable.male_villager);
 			    playerStatus.setText("Alive");
