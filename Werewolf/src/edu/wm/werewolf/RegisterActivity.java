@@ -36,8 +36,12 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Gallery;
 import android.widget.Toast;
 
 public class RegisterActivity extends Activity {
@@ -51,11 +55,14 @@ public class RegisterActivity extends Activity {
 	private Constants c = new Constants();
 	private String username;//do this for all
 	private JSONObject response;
+	String img = "M";
+
 	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
 
 		
@@ -66,14 +73,29 @@ public class RegisterActivity extends Activity {
 		lastNameText = (EditText) findViewById(R.id.lastName);
 		registerButton = (Button) findViewById(R.id.createButton);
 		
+        Gallery gallery = (Gallery) findViewById(R.id.gallery1);
+        gallery.setSpacing(15);
+        gallery.setAdapter(new GalleryImageAdapter(this));
+
+    // clicklistener for Gallery
+        gallery.setOnItemClickListener(new OnItemClickListener() {
+       public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+//           Toast.makeText(RegisterActivity.this, "Your selected position = " + position, Toast.LENGTH_SHORT).show();
+           // show the selected Image
+           if(position == 0){
+        	   img = "M";
+           }else{
+        	   img = "F";
+           }
+       }
+   });
+		
 		if (savedInstanceState == null){
 			username = "";
 		}
 		else{
 			username = savedInstanceState.getString("username");
 		}
-		
-
 	}
 
 	@Override
@@ -109,16 +131,30 @@ public class RegisterActivity extends Activity {
 					Toast toast3 = Toast.makeText(context3, text3, duration3);
 					toast3.show();
 					Intent intent2 = new Intent(context3, GameStatus.class);
+					intent2.putExtra("username", usernameText.getText().toString());
+					intent2.putExtra("password", passwordText.getText().toString());
+
+					intent2.putExtra(c.isWerewolf(), false);
+
+					intent2.putExtra(c.getGameStatus(), response.getString(c.getGameStatus()));
+					intent2.putExtra(c.createTime(), response.getLong(c.createTime()));
+					intent2.putExtra(c.nightFreq(), response.getLong(c.nightFreq()));
+					intent2.putExtra(c.allPlayers(), response.toString());
 					intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent2);
 			  }else{
 				  	Context context3 = getApplicationContext();
-					CharSequence text3 = "There was an error creating your account.";
+					CharSequence text3 = "Try a different username.";
 					int duration3 = Toast.LENGTH_SHORT;
 					Toast toast3 = Toast.makeText(context3, text3, duration3);
 					toast3.show();
 			  }
 		} catch (JSONException e) {
+		  	Context context3 = getApplicationContext();
+			CharSequence text3 = "Try a different username.";
+			int duration3 = Toast.LENGTH_SHORT;
+			Toast toast3 = Toast.makeText(context3, text3, duration3);
+			toast3.show();
 			e.printStackTrace();
 		}
 	    }
@@ -139,7 +175,8 @@ public class RegisterActivity extends Activity {
 		pairs.add(new BasicNameValuePair("firstName", firstNameText.getText().toString()));
 		pairs.add(new BasicNameValuePair("lastName", lastNameText.getText().toString()));
 		pairs.add(new BasicNameValuePair("hashedPassword", passwordText.getText().toString()));
-	    DownloadWebPageTask task = new DownloadWebPageTask(true, usernameText.getText().toString(), passwordText.getText().toString(), pairs, true);
+		pairs.add(new BasicNameValuePair("img", img));
+	    DownloadWebPageTask task = new DownloadWebPageTask(true, "", "".toString(), pairs, true);
 	    task.execute(new String[] { c.addUserURL() });
 
 	  }

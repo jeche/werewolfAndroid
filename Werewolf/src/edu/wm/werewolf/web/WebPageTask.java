@@ -74,9 +74,11 @@ public class WebPageTask extends AsyncTask<String, Void, String>{
 			          if(hasPairs){
 				          	httpPost.setEntity(new UrlEncodedFormEntity(pairs));
 				          }
+			          if(!username.equals("")){
 			          httpPost.addHeader(BasicScheme.authenticate(
 			        		  new UsernamePasswordCredentials(username, password),
 			        		  "UTF-8", false));
+			          }
 			          execute = client.execute(httpPost);
 				}
 	        	else{

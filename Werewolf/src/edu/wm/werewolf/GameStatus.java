@@ -17,7 +17,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import edu.wm.werewolf.service.GameUpdateService;
 import edu.wm.werewolf.web.Constants;
 import edu.wm.werewolf.web.WebPageTask;
@@ -32,6 +31,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -53,7 +53,7 @@ import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class GameStatus extends Activity{
-	
+	MediaPlayer mpG;// = MediaPlayer.create(getApplicationContext(), R.raw.AudioFile1); mp.start();
 	JSONObject response;
 	JSONArray responseArray;
 	boolean isNight;
@@ -95,40 +95,92 @@ public class GameStatus extends Activity{
 //	    	startActivity(intent);
 	    	if(clicked){
 	    		clicked = false;
-	    		Log.v(TAG, "Post executed");
-	    		Log.v(TAG, "RESULT VAL:" + result);
-	    		JSONObject re = null;
-				try {
-					re = new JSONObject(result);
+		    	try {
+					JSONObject resp = new JSONObject(result);
+					if(resp.getString("status").contains("success")){
+					  	Context context3 = getApplicationContext();
+						CharSequence text3 = null;
+						if(voted){
+						text3 = "Vote Success";
+						voted = false;
+						customHandler.postDelayed(updateGameStatus, 0);
+						}else if (killed){
+						text3 = "Kill Success";
+						killed = false;
+						customHandler.postDelayed(updateGameStatus, 0);
+						}
+						int duration3 = Toast.LENGTH_SHORT;
+						if(text3 != null){
+							Toast toast3 = Toast.makeText(context3, text3, duration3);
+							toast3.show();
+						}
+					}else{
+					  	Context context3 = getApplicationContext();
+						CharSequence text3 = null;
+						if(voted){
+							text3 = "Vote Failed";
+							voted = false;
+						}else if (killed){
+							text3 = "Kill Failed";
+							killed = false;
+						}
+						int duration3 = Toast.LENGTH_SHORT;
+						if(text3 != null){
+							Toast toast3 = Toast.makeText(context3, text3, duration3);
+							toast3.show();
+						}
+					}
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
+				  	Context context3 = getApplicationContext();
+					CharSequence text3 = null;
+					if(voted){
+						text3 = "Vote Failed";
+						voted = false;
+					}else if (killed){
+						text3 = "Kill Failed";
+						killed = false;
+					}
+					int duration3 = Toast.LENGTH_SHORT;
+					if(text3 != null){
+						Toast toast3 = Toast.makeText(context3, text3, duration3);
+						toast3.show();
+					}
 					e.printStackTrace();
 				}
-				Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
-	    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    		i.putExtra("playerinfo", result);
-	    		i.putExtra(c.isWerewolf(), isWerewolf);
-	    		long she = (new Date().getTime() - created) / freq % 2;
-	    		i.putExtra("vote", (she == 0));
-	    		try {
-					i.putExtra("kill", (she == 1 && isWerewolf &&killList.contains(re.getString("id"))));
-				} catch (JSONException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-	    		try {
-					i.putExtra("smell", (she == 1 && isWerewolf &&scentList.contains(re.getString("id"))));
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	    		i.putExtra(c.isDead(), isDead);
-	    		i.putExtra(c.createTime(), created);
-	    		i.putExtra(c.nightFreq(), freq);
-	    		i.putExtra("username", username);
-	    		i.putExtra("password", password);
-//	    		intent.putExtra("isWerewolf", isWerewolf);
-	    		startActivity(i);
+//	    		Log.v(TAG, "Post executed");
+//	    		Log.v(TAG, "RESULT VAL:" + result);
+//	    		JSONObject re = null;
+//				try {
+//					re = new JSONObject(result);
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				Intent i = new Intent(getApplicationContext(), PlayerProfile.class);
+//	    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//	    		i.putExtra("playerinfo", result);
+//	    		i.putExtra(c.isWerewolf(), isWerewolf);
+//	    		long she = (new Date().getTime() - created) / freq % 2;
+//	    		i.putExtra("vote", (she == 0));
+//	    		try {
+//					i.putExtra("kill", (she == 1 && isWerewolf &&killList.contains(re.getString("id"))));
+//				} catch (JSONException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//	    		try {
+//					i.putExtra("smell", (she == 1 && isWerewolf &&scentList.contains(re.getString("id"))));
+//				} catch (JSONException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//	    		i.putExtra(c.isDead(), isDead);
+//	    		i.putExtra(c.createTime(), created);
+//	    		i.putExtra(c.nightFreq(), freq);
+//	    		i.putExtra("username", username);
+//	    		i.putExtra("password", password);
+////	    		intent.putExtra("isWerewolf", isWerewolf);
+//	    		startActivity(i);
 	    	}
 	    	else{
 	    		if(keepUpdating){
@@ -136,7 +188,7 @@ public class GameStatus extends Activity{
 					JSONObject resp = new JSONObject(result);
 					response = resp;
 //					isDead = resp.getBoolean(c.isDead());
-					isWerewolf = resp.getBoolean(c.isWerewolf());
+//					isWerewolf = resp.getBoolean(c.isWerewolf());
 					JSONArray respAr = resp.getJSONArray("players");
 					updateListInfo(resp.toString());
 					if(isDead){
@@ -159,19 +211,24 @@ public class GameStatus extends Activity{
 					v.vibrate(200);
 				}
 				
-				} catch (JSONException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
+				  	Context context3 = getApplicationContext();
+					CharSequence text3 = "Operation failed";
+					int duration3 = Toast.LENGTH_SHORT;
+					if(text3 != null){
+						Toast toast3 = Toast.makeText(context3, text3, duration3);
+						toast3.show();
+					}
 					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} 
 	    		customHandler.postDelayed(updateGameStatus, 60000);
 	    	}
 	    }
 		}
 	  }
-	
+	boolean killed = false;
+	boolean voted = false;
 	private boolean clicked = false;
 	private Constants c = new Constants();
 	private ViewFlipper flippy;
@@ -186,6 +243,7 @@ public class GameStatus extends Activity{
 	long created = 0L;
 	long freq = 0L;
 	View me;
+	boolean go;
 	private ArrayList<String> scentList;
 	private ArrayList<String> deadList;
 	private ArrayList<String> killList;
@@ -208,7 +266,7 @@ public class GameStatus extends Activity{
 		v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		// Vibrate for 400 milliseconds
-		
+		go = true;
 		flippy = (ViewFlipper) findViewById(R.id.flippy);
 		flippy.showNext();
 		n = getResources().getColor(R.color.night);
@@ -218,7 +276,6 @@ public class GameStatus extends Activity{
 		cal.add(Calendar.SECOND, 10);
 		kmap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
-
 		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.flippy);
 		username = getIntent().getExtras().getString("username");
@@ -227,31 +284,37 @@ public class GameStatus extends Activity{
 		intent.putExtra("password", password);
 		playerStatus = (TextView) findViewById(R.id.player_status);
 		playerStatus.setTextColor(Color.WHITE);
-//		PendingIntent pintent = PendingIntent.getService(GameUpdateService.class, 0, intent, 0); // Used for background service
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0); // Used for background service
 		isWerewolf = getIntent().getExtras().getBoolean(c.isWerewolf());
 		isNight = getIntent().getExtras().getString(c.getGameStatus()).contains("true");
-//		if(isNight){
 		col = R.color.night;
 		col2 = R.color.day;
-//		}else{
-//			col = R.color.day;
-//			col2 = R.color.night;
-//		}
 		created = getIntent().getExtras().getLong(c.createTime());
 		freq = getIntent().getExtras().getLong(c.nightFreq());
+		int k = Color.rgb(0,25,51);
+		int d = Color.rgb(102, 178, 255);
+        ColorDrawable[] color = {new ColorDrawable(k ), new ColorDrawable(d)};
+        trans = new TransitionDrawable(color);
+        //This will work also on old devices. The latest API says you have to use setBackground instead.
+//        me.setBackground(trans);
+//        if(!isNight){
+//        	trans.startTransition(0);
+//        }
 		timerValue = (TextView) findViewById(R.id.timerValue);
 		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver")){
-			timerValue.setText("No game currently running.");
+			timerValue.setText("Not currently part of a game.");
 			timerValue.setTextSize(20);
+		}else{
+			customHandler.postDelayed(updateTimerThread, 0);
 		}
-//		alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-//		alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-//                    60*10000, pintent);
-		Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
-		serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
-		serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
-		startService(serviceIntent);
-		customHandler.postDelayed(updateTimerThread, 0);
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+            60*1000, pintent);
+        Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
+        serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
+        serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
+        startService(serviceIntent);
+		
 		customHandler.postDelayed(updateGameStatus, 60000);
 		
 		list = (ListView) findViewById(R.id.listView1);
@@ -286,17 +349,13 @@ public class GameStatus extends Activity{
 //        response = JSONObject(getIntent().getExtras().getString((c.allPlayers())));
         updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
         updateMap(response);
-        if(isNight){
-        	me.setBackgroundColor(col);
-        }else{
-        	me.setBackgroundColor(col2);
-        }
-		int k = Color.rgb(0,25,51);
-		int d = Color.rgb(102, 178, 255);
-        ColorDrawable[] color = {new ColorDrawable(k ), new ColorDrawable(d)};
-        trans = new TransitionDrawable(color);
-        //This will work also on old devices. The latest API says you have to use setBackground instead.
-        me.setBackground(trans);
+        me.setBackgroundColor(n);
+//        if(isNight){
+//        	me.setBackgroundColor(col);
+//        }else{
+//        	me.setBackgroundColor(col2);
+//        }
+
 //        trans.startTransition((int) freq);
         
 	}
@@ -309,40 +368,36 @@ public class GameStatus extends Activity{
 		}
 		
 	}; 
-	boolean go = true;
+
 	private Runnable updateTimerThread = new Runnable() {
 
 		public void run() {
-//			long color;
 			long newCol;
-			int change;
 			timeInMilliseconds = new Date().getTime() - startTime;
 			newCol = timeInMilliseconds;
-			long color2;
-			color2 = newCol;
 			timeInMilliseconds = timeInMilliseconds % freq;
 			timeInMilliseconds = freq - timeInMilliseconds;
 			updatedTime = timeSwapBuff + timeInMilliseconds;
 			newCol = newCol % freq;
 			newCol = freq - newCol;
 			
-			newCol = (newCol * 100) / freq;
-			if(newCol < 15 && go){
-				go = false;
-				if(isNight){
-					trans.startTransition(15000);
-					Toast.makeText(getApplication(), "Transit to day", Toast.LENGTH_SHORT).show();
-				}else{
-					trans.reverseTransition(15000);
-					Toast.makeText(getApplication(), "Transit to night", Toast.LENGTH_SHORT).show();
-				}
-				
-			}else if(newCol > 15){
-				go = true;
-			}
+//			newCol = (newCol * 100) / freq;
+//			if(newCol == 0 && go){
+//				go = false;
+//				if(isNight){
+////					trans.startTransition(5000);
+////					Toast.makeText(getApplication(), "Transit to day", Toast.LENGTH_SHORT).show();
+//				}else{
+////					trans.reverseTransition(5000);
+////					Toast.makeText(getApplication(), "Transit to night", Toast.LENGTH_SHORT).show();
+//				}
+//				
+//			}else if(newCol > 15){
+//				go = true;
+//			}
 			timeInMilliseconds = new Date().getTime() - startTime;
+			long goTime = timeInMilliseconds;
 			newCol = timeInMilliseconds;
-			color2 = newCol;
 			timeInMilliseconds = timeInMilliseconds % freq;
 			timeInMilliseconds = freq - timeInMilliseconds;
 			updatedTime = timeSwapBuff + timeInMilliseconds;
@@ -353,30 +408,40 @@ public class GameStatus extends Activity{
 			if(secs == 0 && mins == 0){
 //				v.vibrate(400);
 			}
+			newCol = newCol % freq;
+			newCol = freq - newCol;
+			
+			newCol = (newCol * 100) / freq;
 			timerValue.setText("" + mins + ":"
 					+ String.format("%02d", secs)); // + ":"
 //					+ String.format("%03d", milliseconds));
+			isNight = !(goTime / freq % 2 == 0);
 			if(mins == 0 && secs == 0 ){
-				if(timeInMilliseconds / freq % 2 == 0){
-					isNight = false;
-					updateListInfo(response.toString());
-				}else{
-					isNight = true;
-					updateListInfo(response.toString());
-				}
-//				updateListInfo(response.toString());
 				
-//				int k = col2;
-//				col2 = col;
-//				col = k;
-//		        ColorDrawable[] color = {new ColorDrawable(col), new ColorDrawable(col2)};
-//		        trans = new TransitionDrawable(color);
-		        //This will work also on old devices. The latest API says you have to use setBackground instead.
-//		        me.setBackground(trans);
-//		        trans.startTransition((int) freq);
+//				if(goTime / freq % 2 == 0 && isNight == true && go){
+//					Log.v(TAG, "Transition to day ");
+//					isNight = false;
+//					go = false;
+//					updateListInfo(response.toString());
+////					trans.startTransition(5000);
+//					Toast.makeText(getApplication(), "Transit to day", Toast.LENGTH_SHORT).show();
+//				}else if(go && goTime / freq % 2 != 0 && isNight != true){
+//					isNight = true;
+//					Log.v(TAG, "Transition to night ");
+////					trans.reverseTransition(5000);
+//					Toast.makeText(getApplication(), "Transit to night", Toast.LENGTH_SHORT).show();
+//					updateListInfo(response.toString());
+//					go = false;
+//				} else if (go == false && mins >=0 && secs > 10){
+//					Log.v(TAG, "Reset go");
+//					go = true;
+//				}
+				
 			}
+			
 			if(keepUpdating){
-				customHandler.postDelayed(this, 0);
+				updateUIElements();
+				customHandler.postDelayed(this, 500);
 			}
 		}
 		};
@@ -399,6 +464,7 @@ public class GameStatus extends Activity{
                 flippy.setOutAnimation(this, R.anim.out_left);
  
                 flippy.showNext();
+                updateUIElements();
             } else {
                 if (flippy.getDisplayedChild() == 0)
                     break;
@@ -407,6 +473,7 @@ public class GameStatus extends Activity{
                 flippy.setOutAnimation(this, R.anim.out_right);
  
                 flippy.showPrevious();
+                updateUIElements();
             }
             break;
         }
@@ -429,7 +496,6 @@ public class GameStatus extends Activity{
 			JSONObject response = new JSONObject(vals);
 			JSONArray array = response.getJSONArray("players");
 			responseArray = array;
-			Log.v(TAG, response.toString());
 			JSONObject obj;
 			boolean isDead;
 			int score = 0;	
@@ -454,7 +520,6 @@ public class GameStatus extends Activity{
 	            	score = obj.getInt("score");
 	            }
 	            if(!obj.getString("id").equals(username)){
-	            	System.out.println(obj.getString("id") + " username: " +  username);
 	            	stringList.add(obj.getString("id"));
 	            	if(isWerewolf && score > 0 && isNight){
 	            		if(score == 1){
@@ -472,16 +537,15 @@ public class GameStatus extends Activity{
 	            	
 	            }else{
 	            	this.isDead = obj.getBoolean(c.isDead());
+	            	this.isWerewolf = obj.getBoolean("werewolf"); 
 	            	updateImg(obj);
-	            	if(isWerewolf){
+	            	if(this.isWerewolf){
 	            		updateKills(obj);
 	            	}
-	            	if(isDead){
+//	            	if(isDead){
 //	            		setDeadUI(obj);
-	            	}
-
+//	            	}
 	            }
-	        	
 	        }
 	        for( int i = 0; i < stringList.size(); i++){
 	        	stringarray[i] = stringList.get(i);
@@ -514,25 +578,27 @@ public class GameStatus extends Activity{
         		String player = ((TextView) view).getText().toString();
                 // selected item
         		if(!clicked){
-        			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-        			pairs.add(new BasicNameValuePair("playername", player));
-        			DownloadWebPageTask task = new DownloadWebPageTask(false, username, password, pairs, false);
-        			task.execute(new String[] { c.getInfoURL() +"/" + player });
         			clicked = true;
+        			System.out.println(isNight+"");
+        			System.out.println(isWerewolf+"   w");
+        			if(!isNight){
+        				List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+	    				pairs.add(new BasicNameValuePair("voted", player));
+	    				Log.v(TAG, "attempting Vote");
+						DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
+						task.execute(new String[] { c.getBaseUrl()+"players/vote" });
+						voted = true;
+        			}else if(isWerewolf && isNight){
+        				List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        				pairs.add(new BasicNameValuePair("victim", player));
+        				DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
+        				task.execute(new String[] { c.kill() });
+        				killed = true;
+        			}	
         		}
-               
             }
-
           });
         list.invalidate();
-        if(changed || killChange){
-        	if(killChange){
-        		v.vibrate(1000);
-        	}else{
-        		v.vibrate(100);
-        		v.vibrate(100);
-        	}
-        }
         if(changedD.size() > 0){
         	String newTest = "Most recent to die: ";
         	for(int i = 0; i < changedD.size(); i ++){
@@ -582,15 +648,7 @@ public class GameStatus extends Activity{
 		int apercent = aliveCount * 100 / ptotal;
 		int total = wolves + peeps;
 		int percent = peeps * 100 / total;
-		if(percent < 50){
-			wolfProgress.setBackgroundColor(Color.RED);
-		}
 		wolfProgress.setProgress(percent);
-		if(apercent < 33){
-			lifeProgress.setBackgroundColor(Color.RED);
-		}else if(apercent < 66){
-			lifeProgress.setBackgroundColor(Color.MAGENTA);
-		}
 		lifeProgress.setProgress(apercent);
 		
 	}
@@ -607,24 +665,21 @@ public class GameStatus extends Activity{
 		JSONArray kAr;
 		try {
 			kAr = respo.getJSONArray("kills");
-	
 		for(int i = 0; i < kAr.length(); i++){
-//				kAr.get(i).getLong("lat");
-//				kAr.get(i).getString("victim");
-//				;
-				
-				
 					kmap.addMarker(new MarkerOptions().position(new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).title(((JSONObject)kAr.get(i)).getString("victimID")));
 					CameraPosition cameraPosition = new CameraPosition.Builder().target(
 			                new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).zoom(12).build();
-			 
-			kmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-				
+					kmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 		}
 		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	
+	public void updateUIElements(){
+		updateListInfo(response.toString());
+		updateProgressBars();
+		updateMap(response);
 	}
 	
 	@Override

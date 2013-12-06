@@ -110,19 +110,40 @@
         
     </TableRow>
     
-    <TableRow
-        android:id="@+id/tableRow6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
         
-        <Button
-            android:id="@+id/createButton"
+    <TextView
+            android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/register" 
-            android:onClick="myClickHandler">
-        </Button>
-     </TableRow>
+            android:layout_alignParentTop="true"
+           android:layout_centerInParent="true"
+            android:text="Pick a picture" />
+
+    <Gallery
+        android:id="@+id/gallery1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView6" />
+     </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/createButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerInParent="true"
+                android:onClick="myClickHandler"
+                android:text="@string/register" />
+
+        </RelativeLayout>
+
   
 
 </TableLayout>

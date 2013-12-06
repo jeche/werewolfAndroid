@@ -81,7 +81,9 @@ public class LoginActivity extends Activity {
 			CharSequence text3 = "Authentication Failed.";
 			int duration3 = Toast.LENGTH_SHORT;
 			Toast toast3 = Toast.makeText(context3, text3, duration3);
+			if(response != null){
 			System.out.println(response.toString());
+			}
 			toast3.show();
 			e.printStackTrace();
 		}
