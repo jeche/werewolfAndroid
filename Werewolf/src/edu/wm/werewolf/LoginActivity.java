@@ -1,5 +1,6 @@
 package edu.wm.werewolf;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import edu.wm.werewolf.web.WebPageTask;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -108,6 +111,19 @@ public class LoginActivity extends Activity {
 			}
 			});
 		registerButton = (Button) findViewById(R.id.profile_button);
+		AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 20, 0);
+		MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.wolf_howl);
+//		try {
+//			mediaPlayer.prepare();
+//		} catch (IllegalStateException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		mediaPlayer.start(); // no need to call prepare(); create() does that for you
 		registerButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				if(!clicked){

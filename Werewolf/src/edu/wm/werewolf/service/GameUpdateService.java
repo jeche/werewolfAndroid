@@ -48,7 +48,7 @@ public class GameUpdateService extends Service implements LocationListener{
 
 		@Override
 	    protected void onPostExecute(String result) {
-	    	
+	    	// Log.e(TAG, result);
 	    }
 	  }
 
@@ -66,9 +66,9 @@ public class GameUpdateService extends Service implements LocationListener{
   		mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
 	    LocationListener mlocListener = this;
-	    mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+	    mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, 0, mlocListener);
 		
-          super.onCreate();
+        super.onCreate();
    }
 
    @Override
@@ -90,7 +90,7 @@ public class GameUpdateService extends Service implements LocationListener{
 //          Criteria c = new Criteria();
 //          mCurrentLocation = mLocationClient.getLastLocation();
 //          provider = locationManager.getBestProvider(c, false);
-////          l = locationManager.getLastKnownLocation(provider);
+//          l = locationManager.getLastKnownLocation(provider);
 //          double lng=l.getLongitude();
 //          double lat=l.getLatitude();
 //          System.out.println("Longitude: " + lng);
@@ -101,20 +101,22 @@ public class GameUpdateService extends Service implements LocationListener{
           pairs.add(new BasicNameValuePair("lat", lat+""));
           DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
           task.execute(new String[] { c.updateLocation() });
+          // Log.e(TAG, "Started");
           return super.onStartCommand(intent, flags, startId);
    }
    
    @Override
    public void onLocationChanged(Location loc)
    {
-	   
+	   // Log.e(TAG, "Loc changed");
        lat = loc.getLatitude();
        lng = loc.getLongitude();
-       List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-       pairs.add(new BasicNameValuePair("lng", lng+""));
-       pairs.add(new BasicNameValuePair("lat", lat+""));
-       DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
-       task.execute(new String[] { c.updateLocation() });
+       // Log.e(TAG, "lat " + lat + " lng " + lng);
+//       List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+//       pairs.add(new BasicNameValuePair("lng", lng+""));
+//       pairs.add(new BasicNameValuePair("lat", lat+""));
+//       DownloadWebPageTask task = new DownloadWebPageTask(true, username, password, pairs, true);
+//       task.execute(new String[] { c.updateLocation() });
 
 //       String Text = "My current location is: " +
 //       "Latitud = " + loc.getLatitude() +
@@ -143,6 +145,7 @@ public class GameUpdateService extends Service implements LocationListener{
    
    public Location getLocation() {
        Location location = null;
+       // Log.e(TAG, "Get Location");
 	try {
 
            // getting GPS status

@@ -2,8 +2,11 @@ package edu.wm.werewolf;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -14,6 +17,7 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -31,7 +35,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -53,7 +59,7 @@ import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class GameStatus extends Activity{
-	MediaPlayer mpG;// = MediaPlayer.create(getApplicationContext(), R.raw.AudioFile1); mp.start();
+	SoundPool mpG;// = MediaPlayer.create(getApplicationContext(), R.raw.AudioFile1); mp.start();
 	JSONObject response;
 	JSONArray responseArray;
 	boolean isNight;
@@ -71,6 +77,7 @@ public class GameStatus extends Activity{
 	boolean keepUpdating = true;
 	int n;
 	int d;
+	int sound;
 	private final static String TAG = "GameStatus";
 	private class DownloadWebPageTask extends WebPageTask{
 
@@ -107,6 +114,15 @@ public class GameStatus extends Activity{
 						}else if (killed){
 						text3 = "Kill Success";
 						killed = false;
+						AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+						  float curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+						  float maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+						  float leftVolume = curVolume/maxVolume;
+						  float rightVolume = curVolume/maxVolume;
+						  int priority = 1;
+						  int no_loop = 0;
+						  float normal_playback_rate = 1f;
+						  mpG.play(sound, leftVolume, rightVolume, priority, no_loop, normal_playback_rate);
 						customHandler.postDelayed(updateGameStatus, 0);
 						}
 						int duration3 = Toast.LENGTH_SHORT;
@@ -190,7 +206,7 @@ public class GameStatus extends Activity{
 //					isDead = resp.getBoolean(c.isDead());
 //					isWerewolf = resp.getBoolean(c.isWerewolf());
 					JSONArray respAr = resp.getJSONArray("players");
-					updateListInfo(resp.toString());
+//					updateListInfo(resp.toString());
 					if(isDead){
 						v.vibrate(200);
 						Thread.currentThread().sleep(200);
@@ -201,10 +217,10 @@ public class GameStatus extends Activity{
 				if(wolves != response.getInt("numWolf") || peeps != response.getInt("numPeep")){
 					wolves = response.getInt("numWolf");
 					peeps = response.getInt("numPeep");
-					updateMap(response);
+//					updateMap(response);
 				}
-				updateProgressBars();
-				updateListInfo(resp.toString());
+//				updateProgressBars();
+//				updateListInfo(resp.toString());
 				if(isDead){
 					v.vibrate(200);
 					Thread.currentThread().sleep(200);
@@ -222,7 +238,7 @@ public class GameStatus extends Activity{
 					}
 					e.printStackTrace();
 				} 
-	    		customHandler.postDelayed(updateGameStatus, 60000);
+	    		customHandler.postDelayed(updateGameStatus, 45000);
 	    	}
 	    }
 		}
@@ -234,14 +250,13 @@ public class GameStatus extends Activity{
 	private ViewFlipper flippy;
 	private TextView timerValue;
 	private TextView playerStatus;
-	private long startTime = 0L;
 	private Handler customHandler = new Handler();
 	long timeInMilliseconds = 0L;
 	long timeSwapBuff = 0L;
 	long updatedTime = 0L;
 	boolean isWerewolf;
-	long created = 0L;
-	long freq = 0L;
+	long created = 1L;
+	long freq = 1L;
 	View me;
 	boolean go;
 	private ArrayList<String> scentList;
@@ -256,10 +271,82 @@ public class GameStatus extends Activity{
 	private ProgressBar lifeProgress;
 	AlarmManager alarm;
 	private TransitionDrawable trans;
+	private ImageView bround;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+        boolean bebo = false;
+        try{
+        JSONObject rego = new JSONObject(getIntent().getExtras().getString((c.allPlayers())));
+        JSONArray array = response.getJSONArray("players");
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject obj = (JSONObject) array.get(i);
+           if(obj.getString("id").equals(username)){
+        	   bebo = true;
+           }
+        }
+        }catch(Exception e){
+        	
+        }
+      
+		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver") ){
+//			setContentView(R.layout.activity_playerlist);
+//			list = (ListView) findViewById(R.id.listView12);
+//			String[] stringarray = null;
+//			try {
+//				JSONObject response = new JSONObject(getIntent().getExtras().getString((c.allPlayers())));
+//				JSONArray array1 = response.getJSONArray("players");
+//				responseArray = array1;
+//				JSONObject obj;
+//				boolean isDead;
+//				int score = 0;	
+//				deadCount = 0;
+//				aliveCount = 0;
+//				ArrayList<Integer> scoreList = new ArrayList<Integer>();
+//				stringarray = new String[array1.length()];
+//				Map<Integer, List<String>> stringList = new HashMap<Integer, List<String>>();
+//		        for (int i = 0; i < array1.length(); i++) {
+//		            obj = (JSONObject) array1.get(i);
+//		            score = obj.getInt("score");
+//		            String addString = "";
+//		            if(obj.getString("id").equals(username)){
+//		            	addString =  "My" + " Score: " + score;
+//		            }else{
+//		            	addString = obj.getString("id") + " Score: " + score;
+//		            }
+//		            
+//		            if(stringList.containsKey(score)){
+//		            	stringList.get(score).add(addString);
+//		            }
+//		            else{
+//		            	List<String> f =  new ArrayList<String>();
+//		            	f.add(addString);
+//		            	stringList.put(score, f);
+//		            }
+//		           
+//		        }
+//		        Collections.sort(scoreList);
+//		        int i = 0;
+//		        for( Integer key: stringList.keySet()){
+//		        	for(String val : stringList.get(key)){
+//		        		stringarray[i] = val;
+//		        		i++;
+//		        	}
+////		        	Log.v(TAG, "in here" + stringarray[i]);
+//		        }
+//		        Log.v(TAG, "out of here");
+//			} catch (JSONException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//	        
+//			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, stringarray); 
+//			
+//			list.setAdapter(adapter);
+//			return;
+////			timerValue.setTextSize(20);
+		}
 		setContentView(R.layout.activity_gamestatus);
 		currStats = (TextView) findViewById(R.id.textView5);
 		// Get instance of Vibrator from current Context
@@ -271,11 +358,13 @@ public class GameStatus extends Activity{
 		flippy.showNext();
 		n = getResources().getColor(R.color.night);
 		d = getResources().getColor(R.color.day);
-		
+		bround = (ImageView) findViewById(R.id.imgur);
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.SECOND, 10);
 		kmap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
+//		mpG = MediaPlayer.create(getApplicationContext(), R.raw.wolf_howl);
+		mpG = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+		sound = mpG.load(this, R.raw.wolf_howl, 1);
 		Intent intent = new Intent(this, GameUpdateService.class);
 		me = findViewById(R.id.flippy);
 		username = getIntent().getExtras().getString("username");
@@ -300,23 +389,22 @@ public class GameStatus extends Activity{
 //        if(!isNight){
 //        	trans.startTransition(0);
 //        }
+
+        
 		timerValue = (TextView) findViewById(R.id.timerValue);
-		if(getIntent().getExtras().getString(c.getGameStatus()).equals("isOver")){
-			timerValue.setText("Not currently part of a game.");
-			timerValue.setTextSize(20);
-		}else{
+		
 			customHandler.postDelayed(updateTimerThread, 0);
-		}
+		
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-            60*1000, pintent);
+            10*1000, pintent);
         Intent serviceIntent = new Intent(getBaseContext(), GameUpdateService.class);
         serviceIntent.putExtra("username", getIntent().getExtras().getString("username"));
         serviceIntent.putExtra("password", getIntent().getExtras().getString("password"));
         startService(serviceIntent);
 		
 		customHandler.postDelayed(updateGameStatus, 60000);
-		
+		updateDayText();
 		list = (ListView) findViewById(R.id.listView1);
 		scentList = new ArrayList<String>();
 		killList = new ArrayList<String>();
@@ -349,6 +437,7 @@ public class GameStatus extends Activity{
 //        response = JSONObject(getIntent().getExtras().getString((c.allPlayers())));
         updateListInfo(getIntent().getExtras().getString((c.allPlayers())));
         updateMap(response);
+        updateDayText();
         me.setBackgroundColor(n);
 //        if(isNight){
 //        	me.setBackgroundColor(col);
@@ -373,7 +462,7 @@ public class GameStatus extends Activity{
 
 		public void run() {
 			long newCol;
-			timeInMilliseconds = new Date().getTime() - startTime;
+			timeInMilliseconds = new Date().getTime() - created;
 			newCol = timeInMilliseconds;
 			timeInMilliseconds = timeInMilliseconds % freq;
 			timeInMilliseconds = freq - timeInMilliseconds;
@@ -395,7 +484,7 @@ public class GameStatus extends Activity{
 //			}else if(newCol > 15){
 //				go = true;
 //			}
-			timeInMilliseconds = new Date().getTime() - startTime;
+			timeInMilliseconds = new Date().getTime() - created;
 			long goTime = timeInMilliseconds;
 			newCol = timeInMilliseconds;
 			timeInMilliseconds = timeInMilliseconds % freq;
@@ -415,33 +504,8 @@ public class GameStatus extends Activity{
 			timerValue.setText("" + mins + ":"
 					+ String.format("%02d", secs)); // + ":"
 //					+ String.format("%03d", milliseconds));
-			isNight = !(goTime / freq % 2 == 0);
-			if(mins == 0 && secs == 0 ){
-				
-//				if(goTime / freq % 2 == 0 && isNight == true && go){
-//					Log.v(TAG, "Transition to day ");
-//					isNight = false;
-//					go = false;
-//					updateListInfo(response.toString());
-////					trans.startTransition(5000);
-//					Toast.makeText(getApplication(), "Transit to day", Toast.LENGTH_SHORT).show();
-//				}else if(go && goTime / freq % 2 != 0 && isNight != true){
-//					isNight = true;
-//					Log.v(TAG, "Transition to night ");
-////					trans.reverseTransition(5000);
-//					Toast.makeText(getApplication(), "Transit to night", Toast.LENGTH_SHORT).show();
-//					updateListInfo(response.toString());
-//					go = false;
-//				} else if (go == false && mins >=0 && secs > 10){
-//					Log.v(TAG, "Reset go");
-//					go = true;
-//				}
-				
-			}
-			
 			if(keepUpdating){
-				updateUIElements();
-				customHandler.postDelayed(this, 500);
+				customHandler.postDelayed(this, 0);
 			}
 		}
 		};
@@ -464,6 +528,7 @@ public class GameStatus extends Activity{
                 flippy.setOutAnimation(this, R.anim.out_left);
  
                 flippy.showNext();
+                isNight = !( (new Date().getTime() - created )/ freq % 2 == 0);
                 updateUIElements();
             } else {
                 if (flippy.getDisplayedChild() == 0)
@@ -471,7 +536,7 @@ public class GameStatus extends Activity{
  
                 flippy.setInAnimation(this, R.anim.in_left);
                 flippy.setOutAnimation(this, R.anim.out_right);
- 
+                isNight = !( new Date().getTime() - created / freq % 2 == 0);
                 flippy.showPrevious();
                 updateUIElements();
             }
@@ -479,19 +544,30 @@ public class GameStatus extends Activity{
         }
         return false;
     }
+	
+	public void updateDayText(){
+		long changer = (new Date().getTime() - created) / freq / 2;
+		isNight = !( (new Date().getTime() - created) / freq % 2 == 0);
+		if(isNight){
+			currStats.setText("Night " + changer);
+			bround.setImageResource(R.drawable.moony);
+			
+		}else{
+			currStats.setText("Day " + (changer + 1));
+			bround.setImageResource(R.drawable.happy_vil);
+		}
+	}
 
 	public void updateListInfo(String vals){
 		String[] stringarray = null;
-		ArrayList<String>tempListS = scentList;
-		ArrayList<String>tempListK = killList;
-		ArrayList<String>tempListD = deadList;
-		changedD = new ArrayList<String>();
-		deadList =  new ArrayList<String>();
-		scentList = new ArrayList<String>();
-		killList = new ArrayList<String>();
-		boolean changed = false;
-		boolean dchange = false;
-		boolean killChange = false;
+//		ArrayList<String>tempListS = scentList;
+//		ArrayList<String>tempListK = killList;
+//		ArrayList<String>tempListD = deadList;
+//		changedD = new ArrayList<String>();
+//		deadList =  new ArrayList<String>();
+//		scentList = new ArrayList<String>();
+//		killList = new ArrayList<String>();
+
 		try {
 			JSONObject response = new JSONObject(vals);
 			JSONArray array = response.getJSONArray("players");
@@ -507,11 +583,10 @@ public class GameStatus extends Activity{
 	            obj = (JSONObject) array.get(i);
 	            isDead = obj.getBoolean(c.isDead());
 	            if(isDead){
-	            	if(tempListD.contains(obj.getString("id"))){
-	            		dchange = true;
-	            		changedD.add(obj.getString("id"));
+	            	if(!deadList.contains(obj.getString("id"))){
+		            	deadList.add(obj.getString("id"));
 	            	}
-	            	deadList.add(obj.getString("id"));
+
 	            	deadCount++;
 	            }else{
 	            	aliveCount++;
@@ -521,17 +596,17 @@ public class GameStatus extends Activity{
 	            }
 	            if(!obj.getString("id").equals(username)){
 	            	stringList.add(obj.getString("id"));
-	            	if(isWerewolf && score > 0 && isNight){
+	            	if(isWerewolf && score > 0){
 	            		if(score == 1){
-	            			if(!tempListS.contains(obj.getString("id"))){
-	            				changed = true;
+	            			if(!scentList.contains(obj.getString("id"))){
+		            			scentList.add(obj.getString("id"));
+
 	            			}
-	            			scentList.add(obj.getString("id"));
 	            		}else if(score == 2){
-	            			if(!tempListK.contains(obj.getString("id"))){
-	            				killChange = true;
+	            			if(!killList.contains(obj.getString("id"))){
+	            				killList.add(obj.getString("id"));
 	            			}
-	            			killList.add(obj.getString("id"));
+	            			
 	            		}
 	            	}
 	            	
@@ -539,12 +614,7 @@ public class GameStatus extends Activity{
 	            	this.isDead = obj.getBoolean(c.isDead());
 	            	this.isWerewolf = obj.getBoolean("werewolf"); 
 	            	updateImg(obj);
-	            	if(this.isWerewolf){
-	            		updateKills(obj);
-	            	}
-//	            	if(isDead){
-//	            		setDeadUI(obj);
-//	            	}
+
 	            }
 	        }
 	        for( int i = 0; i < stringList.size(); i++){
@@ -560,11 +630,23 @@ public class GameStatus extends Activity{
         	public View getView(int position, View convertView, ViewGroup parent) {
 	            TextView textView = (TextView) super.getView(position, convertView, parent);
 	            textView.setTextColor(Color.WHITE);
-	            if(scentList.contains(textView.getText().toString())){
-	            	textView.setTextColor(Color.YELLOW);
+	            textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+	            isNight = !( (new Date().getTime() - created )/ freq % 2 == 0);
+	            if(deadList.contains(textView.getText().toString())){
+	            	textView.setTextColor(Color.MAGENTA);
+	            	Drawable myIcon = getResources().getDrawable( R.drawable.skull );
+//	            	textView.setCompoundDrawables(null, null, R.drawable, null);
+//	            	textView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.skull, 0);
+	            	textView.setCompoundDrawablesWithIntrinsicBounds(null, null, myIcon, null);
+//	            	Log.v(TAG, deadList.toString());
+	            	textView.invalidate();
 	            }
-	            if(killList.contains(textView.getText().toString())){;
+	            else if(killList.contains(textView.getText().toString())&& isNight){
 	            	textView.setTextColor(Color.RED);
+	            	
+	            }
+	            else if(scentList.contains(textView.getText().toString())&& isNight){
+	            	textView.setTextColor(Color.YELLOW);
 	            }
 	            return textView;
         	}
@@ -598,19 +680,21 @@ public class GameStatus extends Activity{
         		}
             }
           });
+//        Log.e(TAG, "invalidated with results " + responseArray.toString());
         list.invalidate();
-        if(changedD.size() > 0){
-        	String newTest = "Most recent to die: ";
-        	for(int i = 0; i < changedD.size(); i ++){
-        		newTest = newTest + changedD.get(i);
-        		if(i != changedD.size() - 1){
-        			newTest = newTest + ", ";
-        		}
-        	}
-        	currStats.setText(newTest);
-        }else{
-        	currStats.setText("No one has died recently.");
-        }
+        list.refreshDrawableState();
+//        if(changedD.size() > 0){
+//        	String newTest = "Most recent to die: ";
+//        	for(int i = 0; i < changedD.size(); i ++){
+//        		newTest = newTest + changedD.get(i);
+//        		if(i != changedD.size() - 1){
+//        			newTest = newTest + ", ";
+//        		}
+//        	}
+//        	currStats.setText(newTest);
+//        }else{
+//        	currStats.setText("No one has died recently.");
+//        }
         updateProgressBars();
 	}
 	
@@ -621,7 +705,9 @@ public class GameStatus extends Activity{
 
 	private void updateImg(JSONObject obj) {
 		try {
+			isNight = !( (new Date().getTime() - created )/ freq % 2 == 0);
 			String img = obj.getString("imgString");
+			Log.e(TAG, isWerewolf + " W " + isNight + " N");
 			if(isDead){
 				image.setImageResource(R.drawable.gravestone);
 				playerStatus.setText("Dead");
@@ -640,6 +726,7 @@ public class GameStatus extends Activity{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		image.invalidate();
 		updateProgressBars();
 	}
 	
@@ -650,7 +737,6 @@ public class GameStatus extends Activity{
 		int percent = peeps * 100 / total;
 		wolfProgress.setProgress(percent);
 		lifeProgress.setProgress(apercent);
-		
 	}
 	
 	@Override
@@ -665,11 +751,14 @@ public class GameStatus extends Activity{
 		JSONArray kAr;
 		try {
 			kAr = respo.getJSONArray("kills");
+		if(kAr.length() > 0){
 		for(int i = 0; i < kAr.length(); i++){
-					kmap.addMarker(new MarkerOptions().position(new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).title(((JSONObject)kAr.get(i)).getString("victimID")));
-					CameraPosition cameraPosition = new CameraPosition.Builder().target(
-			                new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).zoom(12).build();
-					kmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+					kmap.addMarker(new MarkerOptions().position(new LatLng(((JSONObject)kAr.get(i)).getDouble("lat"), ((JSONObject) kAr.get(i)).getDouble("lng"))).title(((JSONObject)kAr.get(i)).getString("victimID")).icon(BitmapDescriptorFactory.fromResource(R.drawable.skull)));
+					
+		}
+		CameraPosition cameraPosition = new CameraPosition.Builder().target(
+                new LatLng(((JSONObject)kAr.get(0)).getDouble("lat"), ((JSONObject) kAr.get(0)).getDouble("lng"))).zoom(12).build();
+		kmap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 		}
 		} catch (JSONException e1) {
 			e1.printStackTrace();
@@ -680,6 +769,7 @@ public class GameStatus extends Activity{
 		updateListInfo(response.toString());
 		updateProgressBars();
 		updateMap(response);
+		updateDayText();
 	}
 	
 	@Override
